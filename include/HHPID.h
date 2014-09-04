@@ -2,7 +2,6 @@
  * HHPID.h
  *
  *  Created on: Jul 17, 2014
- *      Author: vormwald
  */
 
 #ifndef HHPID_H_

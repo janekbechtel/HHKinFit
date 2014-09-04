@@ -2,7 +2,6 @@
  * HHEventRecord.h
  *
  *  Created on: 16.06.2014
- *      Author: Benedikt Vormwald
  */
 
 #ifndef EVENTRECORD_H_

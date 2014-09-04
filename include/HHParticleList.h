@@ -2,7 +2,6 @@
  * HHParticleList.h
  *
  *  Created on: 16.06.2014
- *      Author: bene
  */
 
 #ifndef HHPARTICLELIST_H_

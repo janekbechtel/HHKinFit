@@ -2,7 +2,6 @@
  * HHKinFit.cpp
  *
  *  Created on: Jun 17, 2014
- *      Author: vormwald
  */
 
 #include "HHKinFit.h"

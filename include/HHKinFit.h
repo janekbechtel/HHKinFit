@@ -2,7 +2,6 @@
  *HHKinFit.h
  *
  *  Created on: Jun 17, 2014
- *      Author: vormwald
  */
 
 #ifndef HHKINFIT_H_

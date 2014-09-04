@@ -2,7 +2,6 @@
  * HHParticleList.cpp
  *
  *  Created on: 17.06.2014
- *      Author: bene
  */
 
 #include "HHParticleList.h"

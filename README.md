@@ -12,5 +12,5 @@ you computer know where the shared library can be found:
 export LD_LIBRARY_PATH=<<PATH TO DIRECTORY>>
 
 Open issues:
-* non-positive-definit covariance matrix in some cases --> such events are excluded from the result so far
-* used b-jet energy resolution underestimated
+* non-positive-definit covariance matrix in some cases
+* used b-jet energy error underestimated
