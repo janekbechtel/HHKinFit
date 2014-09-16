@@ -4,9 +4,9 @@
  *  Created on: Jun 17, 2014
  */
 
-#include "HHKinFit.h"
-#include "PSMath.h"
-#include "PSTools.h"
+#include "../include/HHKinFit.h"
+#include "../include/PSMath.h"
+#include "../include/PSTools.h"
 
 #include "TString.h"
 #include "TPad.h"

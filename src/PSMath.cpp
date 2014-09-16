@@ -1,4 +1,4 @@
-#include "PSMath.h"
+#include "../include/PSMath.h"
 
 #include <TMarker.h>
 #include <TPolyMarker.h>
