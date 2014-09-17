@@ -37,6 +37,10 @@ enum pid {
     h1 = 18,
     h2 = 19,
 
+
+    tauvis = 20,
+    tauinvis = 21,
+
     undef
 };
 };

@@ -17,21 +17,21 @@ class HHEventRecord{
 public:
   enum entry{
     undef = -1,
-    UE = 0,    // underlying event
-    ISR = 1,   // ISR gluon jet
-    MET = 2,   // MET
+//    UE = 0,    // underlying event
+//    ISR = 1,   // ISR gluon jet
+    MET = 0,   // MET
 
-    H = 3,     // H
-    htau = 4,  // h --> tau1 tau2
-    hb = 5,    // h --> b1 b2
-    tau1 = 6,  // tau1
-    tau2 = 7,  // tau2
-    b1 = 8,    // b1
-    b2 = 9,    // b2
-    tauvis1   = 10,   // mu1
-    tauinvis1 = 11,  // nu1
-    tauvis2   = 12,  // mu2
-    tauinvis2 = 13  // nu2
+    H = 1,     // H
+    htau = 2,  // h --> tau1 tau2
+    hb = 3,    // h --> b1 b2
+    tau1 = 4,  // tau1
+    tau2 = 5,  // tau2
+    b1 = 6,    // b1
+    b2 = 7,    // b2
+    tauvis1   = 8,   // mu1
+    tauinvis1 = 9,  // nu1
+    tauvis2   = 10,  // mu2
+    tauinvis2 = 11  // nu2
   };
 
   HHEventRecord (HHParticleList* particlelist);

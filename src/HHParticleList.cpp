@@ -34,11 +34,15 @@ HHParticleList::HHParticleList()
   m_particlelist[HHPID::gluon].Set("ISR", 0., 0., 0, kGray);     // ISR gluon
   m_particlelist[HHPID::MET].Set("MET", 0., 0., 0, kGray);       // MET of the event
 
+
+  m_particlelist[HHPID::tauvis].Set("tauvis", 0., 0., 0, kGray);
+  m_particlelist[HHPID::tauinvis].Set("tauinvis", 0., 0., 0, kGray);
+
   // define decays
   m_particlelist[HHPID::H].SetDecay(0, HHPID::h1, HHPID::h2, 1.00);   // (idBR, id1,id2, BR)
   m_particlelist[HHPID::h1].SetDecay(0, HHPID::tau, HHPID::tau, 1.00);
   m_particlelist[HHPID::h2].SetDecay(0, HHPID::b, HHPID::b, 1.00);
-  m_particlelist[HHPID::tau].SetDecay(0, HHPID::mu, HHPID::nu, 1.00); // ?tau implement 3-body decay!!
+  m_particlelist[HHPID::tau].SetDecay(0, HHPID::tauvis, HHPID::tauinvis, 1.00); // ?tau implement 3-body decay!!
 }
 
 HHParticle*

@@ -165,6 +165,7 @@ int main(int argc, char* argv[])
     std::cout << "EVENT" << i << std::endl;
     std::cout << "#############################" << std::endl;
     std::cout << "=====================================" << std::endl;
+    std::cout << "njets:           " << njets << std::endl;
     std::cout << "event:           " << i << std::endl;
     std::cout << "best chi2:       " << chi2_best << std::endl;
     std::cout << "best hypothesis: " << bestHypo.first << " " << bestHypo.second << std::endl;
@@ -177,12 +178,13 @@ int main(int argc, char* argv[])
         std::pair< Int_t, Int_t > hypo(*mh1,*mh2);
         
         //sanity cuts: use only converged fits and events with chi2<25 and make sure used cov was positive definit (this needs to be fixed!)
-        if (fit_convergence.at(hypo)>0 && fit_results_chi2.at(hypo)<25 && fit_results_pull_balance.at(hypo)>0){
         
           std::cout << *mh1 << " " << *mh2 << " " << "chi2_fit:    " << fit_results_chi2.at(hypo) << std::endl;
           std::cout << *mh1 << " " << *mh2 << " " << "prob_fit:    " << fit_results_fitprob.at(hypo) << std::endl;
           std::cout << *mh1 << " " << *mh2 << " " << "mH_fit=      " << fit_results_mH.at(hypo) << std::endl;
           std::cout << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*" << std::endl;
+
+          if (fit_convergence.at(hypo)>0 && fit_results_chi2.at(hypo)<25 && fit_results_pull_balance.at(hypo)>0){
 
           h_mH->Fill(fit_results_mH.at(hypo));
           h_chi2->Fill(fit_results_chi2.at(hypo));

@@ -306,6 +306,7 @@ HHV4Vector::CalcCov()
     m_cov_transversal(0,0) = pow(cos(Phi())*dpt,2);
     m_cov_transversal(1,1) = pow(sin(Phi())*dpt,2);
     m_cov_transversal(0,1) = sin(Phi())*cos(Phi())*dpt*dpt;
+    m_cov_transversal(1,0) = sin(Phi())*cos(Phi())*dpt*dpt;
   }
 
 }

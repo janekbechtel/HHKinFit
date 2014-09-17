@@ -21,8 +21,10 @@ HHKinFitMaster::doFullFit()
 
   eventrecord_rec.UpdateEntry(HHEventRecord::tauvis1)->SetVector(*m_tauvis1);
   eventrecord_rec.UpdateEntry(HHEventRecord::tauvis2)->SetVector(*m_tauvis2);
+
   eventrecord_rec.UpdateEntry(HHEventRecord::b1)->SetVector(*m_bjet1);
   eventrecord_rec.UpdateEntry(HHEventRecord::b1)->SetErrors(GetBjetResoultion(m_bjet1->Eta(),m_bjet1->Et()), 0, 0);
+
   eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetVector(*m_bjet2);
   eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetErrors(GetBjetResoultion(m_bjet2->Eta(),m_bjet2->Et()), 0, 0);
 
@@ -36,7 +38,6 @@ HHKinFitMaster::doFullFit()
       eventrecord_rec.UpdateEntry(HHEventRecord::MET)->SetCov(m_MET_COV);
     }
   }
-
   //loop over all hypotheses
   for(std::vector<Int_t>::iterator mh1 = m_mh1.begin(); mh1 != m_mh1.end(); mh1++){
     for(std::vector<Int_t>::iterator mh2 = m_mh2.begin(); mh2 != m_mh2.end(); mh2++){
@@ -49,7 +50,6 @@ HHKinFitMaster::doFullFit()
       advancedfitter.SetAdvancedBalance(m_advancedBalance);
       advancedfitter.Fit();
 
-
       Double_t chi2_full = advancedfitter.GetChi2();
       Double_t prob_full = TMath::Prob(chi2_full,3);
       Double_t mH_full   = advancedfitter.GetFittedMH();
@@ -60,7 +60,7 @@ HHKinFitMaster::doFullFit()
       std::pair< std::pair< Int_t, Int_t >, Double_t > entry_pullb1_full (hypo_full, advancedfitter.GetPullE(HHEventRecord::b1));
       std::pair< std::pair< Int_t, Int_t >, Double_t > entry_pullb2_full (hypo_full, advancedfitter.GetPullE(HHEventRecord::b2));
       std::pair< std::pair< Int_t, Int_t >, Double_t > entry_pullbalance_full (hypo_full, advancedfitter.GetPullBalance());
-      std::pair< std::pair< Int_t, Int_t >, Int_t > entry_convergence_full (hypo_full, advancedfitter.GetConvergence());
+      std::pair< std::pair< Int_t, Int_t >, Int_t >    entry_convergence_full (hypo_full, advancedfitter.GetConvergence());
       m_fullFitResultChi2.insert(entry_chi2_full);
       m_fullFitResultFitProb.insert(entry_fitprob_full);
       m_fullFitResultMH.insert(entry_mH_full);

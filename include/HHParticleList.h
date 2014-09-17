@@ -26,7 +26,7 @@ public:
 
 private:
   // largest number for array dimensions
-  const static Int_t m_v4maxPartList = 20;
+  const static Int_t m_v4maxPartList = 22;
   HHParticle m_particlelist[m_v4maxPartList];
 };
 

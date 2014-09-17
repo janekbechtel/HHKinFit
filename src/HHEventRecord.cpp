@@ -5,6 +5,7 @@
  */
 
 #include "../include/HHEventRecord.h"
+#include "../include/PSTools.h"
 #include <iostream>
 
 HHEventRecord::HHEventRecord(HHParticleList* particlelist)
@@ -29,8 +30,8 @@ HHEventRecord::HHEventRecord(const HHEventRecord& eventrecord, TString suffix)
 void
 HHEventRecord::MakeHEvent()
 {
-  AddInitialEntry(HHPID::UE);
-  AddInitialEntry(HHPID::gluon);
+//  AddInitialEntry(HHPID::UE);
+//  AddInitialEntry(HHPID::gluon);
   AddInitialEntry(HHPID::MET);
   AddInitialEntry(HHPID::H);
   DecayChain();
@@ -57,11 +58,37 @@ void
 HHEventRecord::Print(TString name, Int_t mode)
 {
   std::cout << "V4EventRecord " << name << std::endl;
+  if (mode == 0) {
+    PSTools::coutf(4, TString(""));
+    std::cout << " ";
+    PSTools::coutf(12, TString("name"));
+    PSTools::coutf(4, TString("ID"));
+    PSTools::coutf(11, TString("  E"));
+    PSTools::coutf(11, TString("  Px"));
+    PSTools::coutf(11, TString("  Py"));
+    PSTools::coutf(11, TString("  Pz"));
+    PSTools::coutf(11, TString("  M"));
+    std::cout << std::endl;
+  }
+  if (mode == 1) {
+    PSTools::coutf(4, TString(""));
+    std::cout << " ";
+    PSTools::coutf(12, TString("name"));
+    PSTools::coutf(4, TString("ID"));
+    PSTools::coutf(11, TString("  E"));
+    PSTools::coutf(11, TString("  Pt"));
+    PSTools::coutf(11, TString("  Eta"));
+    PSTools::coutf(11, TString("  Phi"));
+    PSTools::coutf(11, TString("  M"));
+    std::cout << std::endl;
+  }
+
   for (Int_t index = 0; index < GetNEntries(); index++){
     if (mode == 0) m_eventrecord->at(index)->PrintEPxPyPzM(index);
     if (mode == 1) m_eventrecord->at(index)->PrintEPtEtaPhiM(index);
   }
 }
+
 
 HHV4Vector*
 HHEventRecord::UpdateEntry(Int_t i)
