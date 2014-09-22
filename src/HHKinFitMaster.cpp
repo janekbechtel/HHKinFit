@@ -7,6 +7,8 @@
 #include "../include/HHV4Vector.h"
 #include "TMatrixD.h"
 
+#include "TRandom3.h"
+
 #include <TMath.h>
 #include <cmath>
 #include <cstdlib>
@@ -81,7 +83,7 @@ HHKinFitMaster::doFullFit()
 
 
 
-HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLorentzVector* tauvis1, TLorentzVector* tauvis2):
+HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLorentzVector* tauvis1, TLorentzVector* tauvis2, Bool_t truthinput):
     m_mh1(std::vector<Int_t>()),
     m_mh2(std::vector<Int_t>()),
 
@@ -102,6 +104,40 @@ HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLo
     m_bestMHFullFit(-1),
     m_bestHypoFullFit(std::pair<Int_t, Int_t>(-1,-1))
 {
+  if (truthinput){
+    TRandom3 r;   
+    
+    Double_t bjet1_res = GetBjetResoultion(bjet1->Eta(), bjet1->Et());
+    Double_t bjet1_E  = r.Gaus(bjet1->E(),bjet1_res);
+    Double_t bjet1_P  = sqrt(pow(bjet1->E(),2) - pow(bjet1->M(),2));
+    Double_t bjet1_Pt = sin(bjet1->Theta())*bjet1_P;
+    bjet1->SetPtEtaPhiE(bjet1_Pt, bjet1->Eta(), bjet1->Phi(), bjet1_E);
+    TMatrixD bjet1Cov(2,2);
+    Double_t bjet1_dpt = sin(bjet1->Theta())*bjet1->E()/bjet1->P()*bjet1_res;  // error propagation p=sqrt(e^2-m^2)
+    bjet1Cov(0,0) = pow(cos(bjet1->Phi())*bjet1_dpt,2);                           bjet1Cov(0,1) = sin(bjet1->Phi())*cos(bjet1->Phi())*bjet1_dpt*bjet1_dpt;
+    bjet1Cov(1,0) = sin(bjet1->Phi())*cos(bjet1->Phi())*bjet1_dpt*bjet1_dpt;      bjet1Cov(1,1) = pow(sin(bjet1->Phi())*bjet1_dpt,2);
+   
+    Double_t bjet2_res = GetBjetResoultion(bjet2->Eta(), bjet2->Et());
+    Double_t bjet2_E  = r.Gaus(bjet2->E(),GetBjetResoultion(bjet2->Eta(), bjet2->Et()));
+    Double_t bjet2_P  = sqrt(pow(bjet2->E(),2) - pow(bjet2->M(),2));
+    Double_t bjet2_Pt = sin(bjet2->Theta())*bjet2_P;
+    bjet2->SetPtEtaPhiE(bjet2_Pt, bjet2->Eta(), bjet2->Phi(), bjet2_E); 
+    TMatrixD bjet2Cov(2,2);
+    Double_t bjet2_dpt = sin(bjet2->Theta())*bjet2->E()/bjet2->P()*bjet2_res;  // error propagation p=sqrt(e^2-m^2)
+    bjet2Cov(0,0) = pow(cos(bjet2->Phi())*bjet2_dpt,2);                           bjet2Cov(0,1) = sin(bjet2->Phi())*cos(bjet2->Phi())*bjet2_dpt*bjet2_dpt;
+    bjet2Cov(1,0) = sin(bjet2->Phi())*cos(bjet2->Phi())*bjet2_dpt*bjet2_dpt;      bjet2Cov(1,1) = pow(sin(bjet2->Phi())*bjet2_dpt,2);
+    
+    TLorentzVector* recoil = new TLorentzVector(0,0,0,0);
+    TMatrixD recoilCov(2,2);
+    recoilCov(0,0)=100;  recoilCov(0,1)=0;
+    recoilCov(1,0)=0;    recoilCov(1,1)=100;
+
+    TLorentzVector* met = new TLorentzVector(-(*bjet1 + *bjet2 + *tauvis1 + *tauvis2 + *recoil));
+    TMatrixD metCov(2,2);
+    metCov = recoilCov + bjet1Cov + bjet2Cov;    
+    
+    setAdvancedBalance(met, metCov);
+  }
 }
 
 Double_t
