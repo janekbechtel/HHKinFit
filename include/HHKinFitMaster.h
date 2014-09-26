@@ -13,7 +13,7 @@
 class HHKinFitMaster
 {
 public:
-  HHKinFitMaster( TLorentzVector* bjet1, TLorentzVector* bjet2, TLorentzVector* tauvis1, TLorentzVector* tauvis2, Bool_t truthinput=0 );
+  HHKinFitMaster( TLorentzVector* bjet1, TLorentzVector* bjet2, TLorentzVector* tauvis1, TLorentzVector* tauvis2, Bool_t truthinput=0, TLorentzVector* heavyhiggsgen=NULL);
 
   void doFullFit();
   

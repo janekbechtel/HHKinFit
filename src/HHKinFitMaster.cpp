@@ -83,7 +83,7 @@ HHKinFitMaster::doFullFit()
 
 
 
-HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLorentzVector* tauvis1, TLorentzVector* tauvis2, Bool_t truthinput):
+HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLorentzVector* tauvis1, TLorentzVector* tauvis2, Bool_t truthinput, TLorentzVector* heavyhiggsgen):
     m_mh1(std::vector<Int_t>()),
     m_mh2(std::vector<Int_t>()),
 
@@ -127,7 +127,17 @@ HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLo
     bjet2Cov(0,0) = pow(cos(bjet2->Phi())*bjet2_dpt,2);                           bjet2Cov(0,1) = sin(bjet2->Phi())*cos(bjet2->Phi())*bjet2_dpt*bjet2_dpt;
     bjet2Cov(1,0) = sin(bjet2->Phi())*cos(bjet2->Phi())*bjet2_dpt*bjet2_dpt;      bjet2Cov(1,1) = pow(sin(bjet2->Phi())*bjet2_dpt,2);
     
-    TLorentzVector* recoil = new TLorentzVector(0,0,0,0);
+    TLorentzVector* recoil;
+    if(heavyhiggsgen != NULL){
+       Double_t pxRecoil = r.Gaus(-(heavyhiggsgen->Px() ), 10.0);
+       Double_t pyRecoil = r.Gaus(-(heavyhiggsgen->Py() ), 10.0);
+       recoil = new TLorentzVector(pxRecoil,pyRecoil,0,0);
+    }
+    else{
+      recoil = new TLorentzVector(0,0,0,0);
+      std::cout << "WARNING! Truthinput mode active but no Heavy Higgs gen-information given! Setting Recoil to Zero!" << std::endl;  
+    }
+    
     TMatrixD recoilCov(2,2);
     recoilCov(0,0)=100;  recoilCov(0,1)=0;
     recoilCov(1,0)=0;    recoilCov(1,1)=100;
@@ -137,6 +147,7 @@ HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLo
     metCov = recoilCov + bjet1Cov + bjet2Cov;    
     
     setAdvancedBalance(met, metCov);
+    delete recoil;
   }
 }
 

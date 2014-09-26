@@ -449,6 +449,7 @@ HHKinFit::Fit()
   TMatrixDEigen eigenmatrix(cov);
 
   if (eigenmatrix.GetEigenValues()(0,0)<0 || eigenmatrix.GetEigenValues()(1,1)<0){
+    std::cout << "Recoil covariance matrix has negative Eigenvalues:" << std::endl;
     m_recrecord->Print("",1);
     std::cout << "COV_MET:    " << std::endl;
     PSTools::coutf(9, Cov_MET(0,0));
