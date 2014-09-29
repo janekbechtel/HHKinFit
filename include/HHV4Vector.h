@@ -83,14 +83,17 @@ public:
 
 
 private:
-  Bool_t m_cov_manually_set;
-  TMatrixD m_cov_transversal;
+
   Double_t m_e, m_eta, m_phi, m_m;
   Double_t m_dE, m_dEta, m_dPhi;
-  TString m_name;
   HHPID::pid  m_id, m_id2;
-  Int_t m_mother, m_daughter[10];
-  Int_t m_nDaughter ;
+  
+  Int_t m_mother, m_nDaughter;
+  TString m_name;  
+  Int_t m_daughter[10];
+  Bool_t m_cov_manually_set;
+
+  TMatrixD m_cov_transversal;
 };
 
 #endif /* V4_H_ */

@@ -35,7 +35,7 @@
 
 Int_t
 PSMath::PSfit (Int_t iloop, Int_t &iter, Int_t &method, Int_t &mode,
-               Int_t printlevel, Int_t graphiklevel, Int_t np, Double_t a[],
+               Int_t printlevel, Int_t np, Double_t a[],
                Double_t astart[], Double_t alimit[][2], Double_t aprec[],
                Double_t daN[], Double_t h[], Double_t aMemory[], Double_t chi2,
                Double_t chi2iter[], Double_t g[], Double_t H[], Double_t Hinv[])

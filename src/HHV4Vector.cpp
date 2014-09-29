@@ -34,7 +34,7 @@ HHV4Vector::HHV4Vector(const HHV4Vector & v, TString suffix)
   for (int i = 0; i < m_nDaughter; i++)
     m_daughter[i] = v.Daughter(i);
 }
-
+  
 void
 HHV4Vector::SetPxPyPzE(Double_t px, Double_t py, Double_t pz, Double_t e)
 {

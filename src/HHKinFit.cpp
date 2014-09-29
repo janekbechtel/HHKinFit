@@ -29,20 +29,9 @@ HHKinFit::HHKinFit(HHEventRecord* recrecord)
   m_particlelist = m_recrecord->GetParticleList();
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+HHKinFit::~HHKinFit(){
+  delete m_fitrecord;
+}
 
 void
 HHKinFit::FitNew()
@@ -260,8 +249,8 @@ HHKinFit::Fit()
   Int_t iter = 0;             //  number of iterations
   Int_t method = 1;           //  initial fit method, see PSfit()
   Int_t mode = 1;             //  mode =1 for start of a new fit by PSfit()
-  Int_t icallNewton = -1;     //  init start of Newton Method
-  Int_t iloop = 0;            // counter for falls to fit function
+//   Int_t icallNewton = -1;     //  init start of Newton Method
+//   Int_t iloop = 0;            // counter for falls to fit function
 
   // calculate htau from tauvis; recombine leaves measured entries in event record untouched
   m_recrecord->Recombine();
@@ -390,7 +379,7 @@ HHKinFit::Fit()
       break;
     }
     m_convergence = PSMath::PSfit(iloop, iter, method, mode, m_printlevel,
-                                  m_graphicslevel, np, a, astart, alimit, aprec,
+                                  np, a, astart, alimit, aprec,
                                   daN, h, aMemory, m_chi2, chi2iter, g, H,
                                   Hinv);
   }
