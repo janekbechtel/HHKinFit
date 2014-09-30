@@ -25,10 +25,10 @@ HHKinFitMaster::doFullFit()
   eventrecord_rec.UpdateEntry(HHEventRecord::tauvis2)->SetVector(*m_tauvis2);
 
   eventrecord_rec.UpdateEntry(HHEventRecord::b1)->SetVector(*m_bjet1);
-  eventrecord_rec.UpdateEntry(HHEventRecord::b1)->SetErrors(GetBjetResoultion(m_bjet1->Eta(),m_bjet1->Et()), 0, 0);
+  eventrecord_rec.UpdateEntry(HHEventRecord::b1)->SetErrors(GetBjetResolution(m_bjet1->Eta(),m_bjet1->Et()), 0, 0);
 
   eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetVector(*m_bjet2);
-  eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetErrors(GetBjetResoultion(m_bjet2->Eta(),m_bjet2->Et()), 0, 0);
+  eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetErrors(GetBjetResolution(m_bjet2->Eta(),m_bjet2->Et()), 0, 0);
 
   if (!m_advancedBalance){
     eventrecord_rec.UpdateEntry(HHEventRecord::MET)->SetEEtaPhiM(m_simpleBalancePt,0,0,0);
@@ -107,7 +107,7 @@ HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLo
   if (truthinput){
     TRandom3 r;   
     
-    Double_t bjet1_res = GetBjetResoultion(bjet1->Eta(), bjet1->Et());
+    Double_t bjet1_res = GetBjetResolution(bjet1->Eta(), bjet1->Et());
     Double_t bjet1_E  = r.Gaus(bjet1->E(),bjet1_res);
     Double_t bjet1_P  = sqrt(pow(bjet1->E(),2) - pow(bjet1->M(),2));
     Double_t bjet1_Pt = sin(bjet1->Theta())*bjet1_P;
@@ -117,8 +117,8 @@ HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLo
     bjet1Cov(0,0) = pow(cos(bjet1->Phi())*bjet1_dpt,2);                           bjet1Cov(0,1) = sin(bjet1->Phi())*cos(bjet1->Phi())*bjet1_dpt*bjet1_dpt;
     bjet1Cov(1,0) = sin(bjet1->Phi())*cos(bjet1->Phi())*bjet1_dpt*bjet1_dpt;      bjet1Cov(1,1) = pow(sin(bjet1->Phi())*bjet1_dpt,2);
    
-    Double_t bjet2_res = GetBjetResoultion(bjet2->Eta(), bjet2->Et());
-    Double_t bjet2_E  = r.Gaus(bjet2->E(),GetBjetResoultion(bjet2->Eta(), bjet2->Et()));
+    Double_t bjet2_res = GetBjetResolution(bjet2->Eta(), bjet2->Et());
+    Double_t bjet2_E  = r.Gaus(bjet2->E(),GetBjetResolution(bjet2->Eta(), bjet2->Et()));
     Double_t bjet2_P  = sqrt(pow(bjet2->E(),2) - pow(bjet2->M(),2));
     Double_t bjet2_Pt = sin(bjet2->Theta())*bjet2_P;
     bjet2->SetPtEtaPhiE(bjet2_Pt, bjet2->Eta(), bjet2->Phi(), bjet2_E); 
@@ -264,7 +264,7 @@ HHKinFitMaster::setSimpleBalance(Double_t balancePt, Double_t balanceUncert)
 }
 
 double
-HHKinFitMaster::GetBjetResoultion(double eta, double et){
+HHKinFitMaster::GetBjetResolution(double eta, double et){
   double det=0;
   double de=10;
 
