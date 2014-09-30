@@ -5,7 +5,9 @@
 #include "../include/HHParticleList.h"
 #include "../include/HHPID.h"
 #include "../include/HHV4Vector.h"
+
 #include "TMatrixD.h"
+#include "TRandom3.h"
 
 #include <TMath.h>
 #include <cmath>
@@ -58,7 +60,7 @@ HHDiJetKinFitMaster::doFullFit()
   delete particlelist;
 }
 
-HHDiJetKinFitMaster::HHDiJetKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2):
+HHDiJetKinFitMaster::HHDiJetKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, Bool_t truthinput):
     m_mh(std::vector<Int_t>()),
     m_bjet1(bjet1),
     m_bjet2(bjet2),
@@ -66,6 +68,30 @@ HHDiJetKinFitMaster::HHDiJetKinFitMaster(TLorentzVector* bjet1, TLorentzVector* 
     m_bestChi2FullFit(999),
     m_bestHypoFullFit(std::pair<Int_t, Int_t>(-1,-1))
 {
+  if (truthinput){
+    TRandom3 r;   
+    
+    Double_t bjet1_res = GetBjetResolution(bjet1->Eta(), bjet1->Et());
+    Double_t bjet1_E  = r.Gaus(bjet1->E(),bjet1_res);
+    Double_t bjet1_P  = sqrt(pow(bjet1->E(),2) - pow(bjet1->M(),2));
+    Double_t bjet1_Pt = sin(bjet1->Theta())*bjet1_P;
+    bjet1->SetPtEtaPhiE(bjet1_Pt, bjet1->Eta(), bjet1->Phi(), bjet1_E);
+    TMatrixD bjet1Cov(2,2);
+    Double_t bjet1_dpt = sin(bjet1->Theta())*bjet1->E()/bjet1->P()*bjet1_res;  // error propagation p=sqrt(e^2-m^2)
+    bjet1Cov(0,0) = pow(cos(bjet1->Phi())*bjet1_dpt,2);                           bjet1Cov(0,1) = sin(bjet1->Phi())*cos(bjet1->Phi())*bjet1_dpt*bjet1_dpt;
+    bjet1Cov(1,0) = sin(bjet1->Phi())*cos(bjet1->Phi())*bjet1_dpt*bjet1_dpt;      bjet1Cov(1,1) = pow(sin(bjet1->Phi())*bjet1_dpt,2);
+   
+    Double_t bjet2_res = GetBjetResolution(bjet2->Eta(), bjet2->Et());
+    Double_t bjet2_E  = r.Gaus(bjet2->E(),GetBjetResolution(bjet2->Eta(), bjet2->Et()));
+    Double_t bjet2_P  = sqrt(pow(bjet2->E(),2) - pow(bjet2->M(),2));
+    Double_t bjet2_Pt = sin(bjet2->Theta())*bjet2_P;
+    bjet2->SetPtEtaPhiE(bjet2_Pt, bjet2->Eta(), bjet2->Phi(), bjet2_E); 
+    TMatrixD bjet2Cov(2,2);
+    Double_t bjet2_dpt = sin(bjet2->Theta())*bjet2->E()/bjet2->P()*bjet2_res;  // error propagation p=sqrt(e^2-m^2)
+    bjet2Cov(0,0) = pow(cos(bjet2->Phi())*bjet2_dpt,2);                           bjet2Cov(0,1) = sin(bjet2->Phi())*cos(bjet2->Phi())*bjet2_dpt*bjet2_dpt;
+    bjet2Cov(1,0) = sin(bjet2->Phi())*cos(bjet2->Phi())*bjet2_dpt*bjet2_dpt;      bjet2Cov(1,1) = pow(sin(bjet2->Phi())*bjet2_dpt,2);
+    
+  }
 }
 
 Double_t

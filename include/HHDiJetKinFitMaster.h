@@ -13,7 +13,7 @@
 class HHDiJetKinFitMaster
 {
 public:
-  HHDiJetKinFitMaster( TLorentzVector* bjet1, TLorentzVector* bjet2 );
+  HHDiJetKinFitMaster( TLorentzVector* bjet1, TLorentzVector* bjet2, Bool_t truthinput=true);
 
   void doFullFit();
   
