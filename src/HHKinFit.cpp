@@ -438,77 +438,77 @@ HHKinFit::Fit()
   m_fittedmH = m_fitrecord->GetEntry(HHEventRecord::H)->M();
 
 
-  //check cov matrix
-  TMatrixD Cov_MET     = m_recrecord->GetEntry(HHEventRecord::MET)->GetCov();
-  TMatrixD Cov_b1      = m_recrecord->GetEntry(HHEventRecord::b1)->GetCov();
-  TMatrixD Cov_b2      = m_recrecord->GetEntry(HHEventRecord::b2)->GetCov();
-  TMatrixD Cov_tauvis1 = m_recrecord->GetEntry(HHEventRecord::tauvis1)->GetCov();
-  TMatrixD Cov_tauvis2 = m_recrecord->GetEntry(HHEventRecord::tauvis2)->GetCov();
-  TMatrixD cov = Cov_MET - Cov_b1 - Cov_b2 - Cov_tauvis1 - Cov_tauvis2;
-  TMatrixDEigen eigenmatrixMET(Cov_MET);
-  TMatrixDEigen eigenmatrix(cov);
+//   //check cov matrix
+//   TMatrixD Cov_MET     = m_recrecord->GetEntry(HHEventRecord::MET)->GetCov();
+//   TMatrixD Cov_b1      = m_recrecord->GetEntry(HHEventRecord::b1)->GetCov();
+//   TMatrixD Cov_b2      = m_recrecord->GetEntry(HHEventRecord::b2)->GetCov();
+//   TMatrixD Cov_tauvis1 = m_recrecord->GetEntry(HHEventRecord::tauvis1)->GetCov();
+//   TMatrixD Cov_tauvis2 = m_recrecord->GetEntry(HHEventRecord::tauvis2)->GetCov();
+//   TMatrixD cov = Cov_MET - Cov_b1 - Cov_b2 - Cov_tauvis1 - Cov_tauvis2;
+//   TMatrixDEigen eigenmatrixMET(Cov_MET);
+//   TMatrixDEigen eigenmatrix(cov);
 
-  if (eigenmatrix.GetEigenValues()(0,0)<0 || eigenmatrix.GetEigenValues()(1,1)<0){
-    m_recrecord->Print("",1);
-    std::cout << "COV_MET:    " << std::endl;
-    PSTools::coutf(9, Cov_MET(0,0));
-    PSTools::coutf(9, Cov_MET(0,1)); std::cout << std::endl;
-    PSTools::coutf(9, Cov_MET(1,0));
-    PSTools::coutf(9, Cov_MET(1,1)); std::cout << std::endl;
+//   if (eigenmatrix.GetEigenValues()(0,0)<0 || eigenmatrix.GetEigenValues()(1,1)<0){
+//     m_recrecord->Print("",1);
+//     std::cout << "COV_MET:    " << std::endl;
+//     PSTools::coutf(9, Cov_MET(0,0));
+//     PSTools::coutf(9, Cov_MET(0,1)); std::cout << std::endl;
+//     PSTools::coutf(9, Cov_MET(1,0));
+//     PSTools::coutf(9, Cov_MET(1,1)); std::cout << std::endl;
+// 
+//     std::cout << "COV_b1:     dE=" << m_recrecord->GetEntry(HHEventRecord::b1)->dE() << std::endl;
+//     PSTools::coutf(9, Cov_b1(0,0));
+//     PSTools::coutf(9, Cov_b1(0,1)); std::cout << std::endl;
+//     PSTools::coutf(9, Cov_b1(1,0));
+//     PSTools::coutf(9, Cov_b1(1,1)); std::cout << std::endl;
+// 
+//     std::cout << "COV_b2:     dE=" << m_recrecord->GetEntry(HHEventRecord::b2)->dE() << std::endl;
+//     PSTools::coutf(9, Cov_b2(0,0));
+//     PSTools::coutf(9, Cov_b2(0,1)); std::cout << std::endl;
+//     PSTools::coutf(9, Cov_b2(1,0));
+//     PSTools::coutf(9, Cov_b2(1,1)); std::cout << std::endl;
+// 
+//     std::cout << "COV_recoil: " << std::endl;
+//     PSTools::coutf(9, cov(0,0));
+//     PSTools::coutf(9, cov(0,1)); std::cout << std::endl;
+//     PSTools::coutf(9, cov(1,0));
+//     PSTools::coutf(9, cov(1,1)); std::cout << std::endl;
+// 
+//     std::cout << "eigenvalues COV_MET:" << std::endl;
+//     PSTools::coutf(9, eigenmatrixMET.GetEigenValues()(0,0));
+//     PSTools::coutf(9, eigenmatrixMET.GetEigenValues()(1,1)); std::cout << std::endl;
+// 
+//     std::cout << "eigenvalues COV_recoil:" << std::endl;
+//     PSTools::coutf(9, eigenmatrix.GetEigenValues()(0,0));
+//     PSTools::coutf(9, eigenmatrix.GetEigenValues()(1,1)); std::cout << std::endl;
+// 
+//   }
 
-    std::cout << "COV_b1:     dE=" << m_recrecord->GetEntry(HHEventRecord::b1)->dE() << std::endl;
-    PSTools::coutf(9, Cov_b1(0,0));
-    PSTools::coutf(9, Cov_b1(0,1)); std::cout << std::endl;
-    PSTools::coutf(9, Cov_b1(1,0));
-    PSTools::coutf(9, Cov_b1(1,1)); std::cout << std::endl;
-
-    std::cout << "COV_b2:     dE=" << m_recrecord->GetEntry(HHEventRecord::b2)->dE() << std::endl;
-    PSTools::coutf(9, Cov_b2(0,0));
-    PSTools::coutf(9, Cov_b2(0,1)); std::cout << std::endl;
-    PSTools::coutf(9, Cov_b2(1,0));
-    PSTools::coutf(9, Cov_b2(1,1)); std::cout << std::endl;
-
-    std::cout << "COV_recoil: " << std::endl;
-    PSTools::coutf(9, cov(0,0));
-    PSTools::coutf(9, cov(0,1)); std::cout << std::endl;
-    PSTools::coutf(9, cov(1,0));
-    PSTools::coutf(9, cov(1,1)); std::cout << std::endl;
-
-    std::cout << "eigenvalues COV_MET:" << std::endl;
-    PSTools::coutf(9, eigenmatrixMET.GetEigenValues()(0,0));
-    PSTools::coutf(9, eigenmatrixMET.GetEigenValues()(1,1)); std::cout << std::endl;
-
-    std::cout << "eigenvalues COV_recoil:" << std::endl;
-    PSTools::coutf(9, eigenmatrix.GetEigenValues()(0,0));
-    PSTools::coutf(9, eigenmatrix.GetEigenValues()(1,1)); std::cout << std::endl;
-
-  }
-
-  Double_t px_MET = m_recrecord->GetEntry(HHEventRecord::MET)->Px();
-  Double_t py_MET = m_recrecord->GetEntry(HHEventRecord::MET)->Py();
-
-  Double_t px_b1 = m_recrecord->GetEntry(HHEventRecord::b1)->Px();
-  Double_t py_b1 = m_recrecord->GetEntry(HHEventRecord::b1)->Py();
-
-  Double_t px_b2 = m_recrecord->GetEntry(HHEventRecord::b2)->Px();
-  Double_t py_b2 = m_recrecord->GetEntry(HHEventRecord::b2)->Py();
-
-  Double_t px_tauvis1 = m_recrecord->GetEntry(HHEventRecord::tauvis1)->Px();
-  Double_t py_tauvis1 = m_recrecord->GetEntry(HHEventRecord::tauvis1)->Py();
-
-  Double_t px_tauvis2 = m_recrecord->GetEntry(HHEventRecord::tauvis2)->Px();
-  Double_t py_tauvis2 = m_recrecord->GetEntry(HHEventRecord::tauvis2)->Py();
-
-  Double_t px_H_reco = px_MET + px_b1 + px_b2 + px_tauvis1 + px_tauvis2;
-  Double_t py_H_reco = py_MET + py_b1 + py_b2 + py_tauvis1 + py_tauvis2;
-
-  std::cout << "MET:" << std::endl;
-  PSTools::coutf(9, px_MET);
-  PSTools::coutf(9, py_MET); std::cout << std::endl;
-
-  std::cout << "recoil:" << std::endl;
-  PSTools::coutf(9, -px_H_reco);
-  PSTools::coutf(9, -py_H_reco); std::cout << std::endl;
+//   Double_t px_MET = m_recrecord->GetEntry(HHEventRecord::MET)->Px();
+//   Double_t py_MET = m_recrecord->GetEntry(HHEventRecord::MET)->Py();
+// 
+//   Double_t px_b1 = m_recrecord->GetEntry(HHEventRecord::b1)->Px();
+//   Double_t py_b1 = m_recrecord->GetEntry(HHEventRecord::b1)->Py();
+// 
+//   Double_t px_b2 = m_recrecord->GetEntry(HHEventRecord::b2)->Px();
+//   Double_t py_b2 = m_recrecord->GetEntry(HHEventRecord::b2)->Py();
+// 
+//   Double_t px_tauvis1 = m_recrecord->GetEntry(HHEventRecord::tauvis1)->Px();
+//   Double_t py_tauvis1 = m_recrecord->GetEntry(HHEventRecord::tauvis1)->Py();
+// 
+//   Double_t px_tauvis2 = m_recrecord->GetEntry(HHEventRecord::tauvis2)->Px();
+//   Double_t py_tauvis2 = m_recrecord->GetEntry(HHEventRecord::tauvis2)->Py();
+// 
+//   Double_t px_H_reco = px_MET + px_b1 + px_b2 + px_tauvis1 + px_tauvis2;
+//   Double_t py_H_reco = py_MET + py_b1 + py_b2 + py_tauvis1 + py_tauvis2;
+// 
+//   std::cout << "MET:" << std::endl;
+//   PSTools::coutf(9, px_MET);
+//   PSTools::coutf(9, py_MET); std::cout << std::endl;
+// 
+//   std::cout << "recoil:" << std::endl;
+//   PSTools::coutf(9, -px_H_reco);
+//   PSTools::coutf(9, -py_H_reco); std::cout << std::endl;
 
 
   if (m_logLevel>0){
