@@ -1,7 +1,7 @@
 #include "../include/HHDiJetKinFitMaster.h"
 
 #include "../include/HHEventRecord.h"
-#include "../include/HHDiJetKinFit.h"
+#include "../include/HHDiJetKinFitNewMini.h"
 #include "../include/HHParticleList.h"
 #include "../include/HHPID.h"
 #include "../include/HHV4Vector.h"
@@ -30,9 +30,13 @@ HHDiJetKinFitMaster::doFullFit()
   for(std::vector<Int_t>::iterator mh = m_mh.begin(); mh != m_mh.end(); mh++){
     particlelist->UpdateMass(HHPID::h2, *mh);
 
-    HHDiJetKinFit advancedfitter(&eventrecord_rec);
+
+    //HHDiJetKinFit advancedfitter(&eventrecord_rec);
+    HHDiJetKinFitNewMini advancedfitter(&eventrecord_rec); //Choose Minimiser
+
     advancedfitter.SetPrintLevel(2);
     advancedfitter.SetLogLevel(2);
+
     advancedfitter.Fit();
     
     Double_t chi2_full = advancedfitter.GetChi2();
