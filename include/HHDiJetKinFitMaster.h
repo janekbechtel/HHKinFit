@@ -36,6 +36,14 @@ public:
   //Resolution  
   Double_t GetBjetResolution(Double_t eta, Double_t et);
 
+  Double_t m_invMassAfterSmearing;
+  Double_t m_bjet1MassAfterSmearing;
+  Double_t m_bjet2MassAfterSmearing;
+  Double_t m_bJet1Diff;
+  Double_t m_bJet2Diff;
+  Double_t m_bJet1DiffPt;
+  Double_t m_bJet2DiffPt;
+  Double_t m_chi2Truth;
 private:
   //hypotheses
   std::vector< Int_t > m_mh;
