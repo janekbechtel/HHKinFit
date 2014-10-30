@@ -140,7 +140,7 @@ HHDiJetKinFit::FitNew()
 void
 HHDiJetKinFit::Fit()
 {
-std::cout << "<HHDiJetKinFit::Fit>:" << std::endl;
+// std::cout << "<HHDiJetKinFit::Fit>:" << std::endl;
   //  ----------  for PSfit -----
   const Int_t np = 1;
   Double_t a[np];
