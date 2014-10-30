@@ -73,7 +73,7 @@ PSMath::PSfit (Int_t iloop, Int_t &iter, Int_t &method, Int_t &mode,
   static Double_t x[4], f[4];
   static Double_t xx, xlimit[2];
   static Double_t xh, daNabs;
-  static Double_t epsx = 0.01, epsf = 0.01;
+  static Double_t epsx = 0.1, epsf = 0.1;
   Int_t convergence;
 
   Int_t itemp, ready;
@@ -83,9 +83,11 @@ PSMath::PSfit (Int_t iloop, Int_t &iter, Int_t &method, Int_t &mode,
 
   convergence = 0;
   if (iloop == 0) {                                       // start of a new fit
+    if( PSVnorm (daN, np) == 0)
+      std::cout << "WARNING! No initial search direction given! Start with Newton Method not yet supported!" << std::endl;
     iterMemory = 0;
     iter = 0;
-    chi2Memory = 12345.;
+    chi2Memory = 123456.;
     for (Int_t ip = 0; ip < np; ip++) {                          // check limits
       alimit[ip][0] = fmax (alimit[ip][0], -pow (10.0, 10.0));
       alimit[ip][1] = fmin (alimit[ip][1], pow (10.0, 10.0));
@@ -93,9 +95,25 @@ PSMath::PSfit (Int_t iloop, Int_t &iter, Int_t &method, Int_t &mode,
         alimit[ip][0] = -pow (10.0, 10.0);
         alimit[ip][1] = pow (10.0, 10.0);
       }
-      if (astart[ip] < alimit[ip][0] || astart[ip] > alimit[ip][1]) { // repair if out of limits
+      if (astart[ip] < alimit[ip][0] || astart[ip] > alimit[ip][1]) { // NOT WORKING astart has no effect once the loop started!
         astart[ip] = 0.5 * (alimit[ip][0] + alimit[ip][1]); // set to mean in between limits
         return convergence;
+      }
+    }
+  }
+
+  if (method == 3) {
+    if(fabs(chi2Memory - chi2) < epsf) {      // test convergence
+      convergence = 1;
+      iterMemory = iterMemory + 1;
+      iter = iterMemory;
+      chi2Memory = chi2;
+    }
+    else{
+      method = 1;                       // switch to line search
+      mode = 1;
+      for (Int_t ip = 0; ip < np; ip++) {
+	astart[ip] = a[ip];
       }
     }
   }
@@ -107,16 +125,23 @@ PSMath::PSfit (Int_t iloop, Int_t &iter, Int_t &method, Int_t &mode,
       //      xh     = PSVnorm(h, np) ;        // initial step width for line search
       xh = PSVnorm (daN, np);        // initial step width for line search
 
-      if (daNabs == 0.) {
-        method = 2;
-        icallNewton = -1;
-      }  // switch to Newton Method if no initial search direction
+      if (daNabs == 0.)
+        return 5;                            //Ran into limits. Search can't continue!
+      
       else {
         PSLineLimit (np, astart, daN, alimit, xlimit);
       }      // limits for line search
     }
 
-    xx = PSLineSearch (mode, xh, xlimit, epsx, epsf, x, f, chi2);
+    Double_t epsxLS = epsx;
+
+    for(Int_t ip = 0; ip < np; ip++) {
+      if(aprec[ip]*0.5/fabs(daN[ip]) < epsxLS){
+	epsxLS = aprec[ip]*0.5/fabs(daN[ip]);
+      }
+    }
+
+    xx = PSLineSearch (mode, xh, xlimit, epsxLS, epsf, x, f, chi2);
     for (Int_t ip = 0; ip < np; ip++) {
       a[ip] = astart[ip] + xx * daN[ip];
     }
@@ -124,26 +149,29 @@ PSMath::PSfit (Int_t iloop, Int_t &iter, Int_t &method, Int_t &mode,
     if (mode <= 0) {                                            // Minimum found
       //      PSVprint("aMemory ",aMemory,np) ;
       //      PSVprint("      a ", a, np) ;
+      bool didConverge = true;
       for (Int_t ip = 0; ip < np; ip++) { // check for progress w.r.t. previous iteration
-        if (abs (a[ip] - aMemory[ip]) > aprec[ip]) {
+        if (fabs(a[ip] - aMemory[ip]) > aprec[ip]) {
+	  didConverge = false;
           break;
         }
-        else {
-          convergence = 2;
-          iterMemory = iterMemory + 1;
-          iter = iterMemory;
-          return convergence;
-        }
       }
+      if(didConverge){
+	convergence = 2;
+	iterMemory = iterMemory + 1;
+	iter = iterMemory;
+	return convergence;
+      }
+
       for (Int_t ip = 0; ip < np; ip++) {
         aMemory[ip] = a[ip];
       }
+
       method = 2;
       icallNewton = -1;                          // switch to Newton Method
       iterMemory = iterMemory + 1;
       iter = iterMemory;
       chi2Memory = chi2;
-      // std::cout << "LineSearch is ready  iter " << iter << " chi2 " << chi2 ; PSVprint("  a " ,a, np) ;
     }
   }
 
@@ -155,7 +183,10 @@ PSMath::PSfit (Int_t iloop, Int_t &iter, Int_t &method, Int_t &mode,
       return convergence;
     }
 
-    ready = PSderivative (icallNewton, np, a, h, chi2, chi2iter, g, H);
+    if(np > 1)
+      ready = PSderivative(icallNewton, np, a, h, chi2, chi2iter, g, H);
+    else
+      ready = PSderivative1(icallNewton, a, h, chi2, g, H);
 
     icallNewton = icallNewton + 1;
     d = 99.;
@@ -163,19 +194,14 @@ PSMath::PSfit (Int_t iloop, Int_t &iter, Int_t &method, Int_t &mode,
       PSNewtonLimitShift (-1, np, a, alimit, aprec, daN, h, g, H);
 
       d = PSNewtonAnalyzer (np, a, alimit, aprec, daN, h, g, H, Hinv, chi2, printlevel);
-
       //      std::cout << "d " << d << "   chi2Memory " << chi2Memory << "  chi2 " << chi2 << std::endl;
-      if (d < epsx && abs (chi2Memory - chi2) < epsf) {      // test convergence
-      //      if (d< epsx ) {
-        convergence = 1;
-        iterMemory = iterMemory + 1;
-        iter = iterMemory;
-        chi2Memory = chi2;
+      if (d < epsx) {      // test convergence in next run by checking if deltaChi2 is small enough
+        method = 3;
       }
       else {
-        method = 1;
-        mode = 1;                        // switch to line search
-        for (Int_t ip = 0; ip < np; ip++) {
+	method = 1;
+	mode = 1;                        // switch to line search
+	for (Int_t ip = 0; ip < np; ip++) {
           astart[ip] = a[ip];
         }
       }
@@ -202,7 +228,7 @@ PSMath::PSNewtonLimitShift (Int_t sign, Int_t np, Double_t a[],
         h[ip] = aprec[ip] * 0.8;
       }
       else if (a[ip] < alimit[ip][0] + h[ip]) {
-        h[ip] = abs (alimit[ip][0] - a[ip]) * 0.99;
+        h[ip] = fabs(alimit[ip][0] - a[ip]) * 0.99;
       }
       if (a[ip] > alimit[ip][1] - aprec[ip]) {
         daN[ip] = -aprec[ip] * 0.9;
@@ -210,7 +236,7 @@ PSMath::PSNewtonLimitShift (Int_t sign, Int_t np, Double_t a[],
         h[ip] = aprec[ip] * 0.8;
       }
       else if (a[ip] > alimit[ip][1] - h[ip]) {
-        h[ip] = abs (alimit[ip][1] - a[ip]) * 0.99;
+        h[ip] = fabs(alimit[ip][1] - a[ip]) * 0.99;
       }
     }
   }
@@ -254,18 +280,18 @@ PSMath::PSNewtonAnalyzer (Int_t np, Double_t a[], Double_t alimit[][2],
   if (np == 2) {
     if (H[0] * H[3] <= H[1] * H[2]) {
       iNewton = 0;
-      if (printlevel>0) std::cout << "PSNewtonAnalyzer check 1 (det<0)" << std::endl;
+      if (printlevel>0) std::cout << "PSNewton Analyzer check 1 (det<0)" << std::endl;
     }
   } // check only works for np=2
   for (Int_t ip = 0; ip < np; ip++) {    // check for positive Diagonal of Hesse
     if (H[ip * np + ip] < 0.) {
       iNewton = 0;
-      if (printlevel>0) std::cout << "PSNewtonAnalyzer check 2 (negative diagonal entries)" << std::endl;
+      if (printlevel>0) std::cout << "PSNewton Analyzer check 2 (negative diagonal entries)" << std::endl;
       break;
     }
-    if (H[ip * np + ip] * h[ip] < 0.07 * abs (g[ip])) {
+    if (H[ip * np + ip] * h[ip] < 0.07 * fabs(g[ip])) {
       iNewton = 0;
-      if (printlevel>0) std::cout << "PSNewtonAnalyzer check 3" << std::endl;
+      if (printlevel>0) std::cout << "PSNewton Analyzer check 3" << std::endl;
       //      cout << "ip  " << ip << "  H " << H[ip*np+ip] << "  h " << h[ip] << "  g " << g[ip]
       //	   << "   H[ip*np+ip] * h[ip] " << H[ip*np+ip] * h[ip]
       //	   << "  0.07 * abs(g[ip]) " << 0.07 * abs(g[ip]) << endl;
@@ -291,7 +317,7 @@ PSMath::PSNewtonAnalyzer (Int_t np, Double_t a[], Double_t alimit[][2],
 
   // ------------- Newton not ok ------------------------ 
   if (iNewton != 1) {
-    if (printlevel>0) std::cout << "PSNewtonAnalyzer ===== WARNING ========== H is not positive definit" << std::endl;
+    if (printlevel>0) std::cout << "PSNewton Analyzer ===== WARNING ========== H is not positive definit" << std::endl;
     //    PSVprint( "    a      ",a     ,np) ;
     //    PSM2print("    alimit ",alimit,np) ;
     //    PSVprint( "    aprec  ",aprec ,np) ;
@@ -312,7 +338,7 @@ PSMath::PSNewtonAnalyzer (Int_t np, Double_t a[], Double_t alimit[][2],
       else if (a[ip] > alimit[ip][1] - aprec[ip]) {
         h[ip] = aprec[ip];
         daN[ip] = fmin (daN[ip], 0.);
-        //if (daN[ip]*g[ip]<0.) {daN[ip] = 0.; }
+	//if (daN[ip]*g[ip]<0.) {daN[ip] = 0.; }
       }
     }
     //    PSVprint( "      g    ",g   ,np) ;
@@ -322,13 +348,13 @@ PSMath::PSNewtonAnalyzer (Int_t np, Double_t a[], Double_t alimit[][2],
   }
 
   // ------------ Newton step seems to be fine --------------
-  //  cout << "PSNewtonAnalyzer  Newton step seems to be fine" << endl;
   PSLineLimit (np, a, daN, alimit, xlimit);  // get distance to limit
+  
   Double_t xmax = fmin (1., xlimit[1]); //  Newton step would lead out of limits
 
   for (Int_t ip = 0; ip < np; ip++) {                       // apply Newton step
     a[ip] = a[ip] + daN[ip] * xmax;                  // update parameter value
-    h[ip] = 100. * sqrt (0.000001 * abs (chi2 / H[ip * np + ip])); // update step width
+    h[ip] = 100. * sqrt (0.000001 * fabs(chi2 / H[ip * np + ip])); // update step width
   }
 
   //  PSVprint("in Analyzer  vor limits  daN ",daN,np) ;
@@ -361,16 +387,14 @@ PSMath::PSNewtonAnalyzer (Int_t np, Double_t a[], Double_t alimit[][2],
     //    PSMprint("d<0  H "  ,H,  np,np) ;
     d = 111.;
   }
-  //  cout << "PSNewtonAnalyzer  version  d-1  " << d << endl;
-
+  
   Double_t d2 = 0.;
   for (Int_t ip = 0; ip < np; ip++) {
     for (Int_t jp = 0; jp < np; jp++) {
       d2 = d2 + daN[ip] * H[ip * np + jp] * daN[jp];
     }
   }
-  //  cout << "PSNewtonAnalyzer  version  d-2  " << d2 << endl;
-
+  
   return d;
 }
 //-------------------------------------------------------
@@ -521,7 +545,7 @@ PSMath::PSLineSearch (Int_t & mode, Double_t hh, Double_t xlimit[],
     //    PSVprint("  xlimit ",xlimit,2) ;
     //    PSVprint("  x      ",x,4) ;
     // set up for "+x" search direction
-    h = fmin (abs (hh), 0.25 * (xlimit[1] - xlimit[0]));  // limit h to xlimit
+    h = fmin (fabs(hh), 0.25 * (xlimit[1] - xlimit[0]));  // limit h to xlimit
     x[1] = 0.;
     f[1] = chi2;
     x[2] = x[1] + h;
@@ -560,7 +584,7 @@ PSMath::PSLineSearch (Int_t & mode, Double_t hh, Double_t xlimit[],
     //    coutf(14,4, f[1]) ;   coutf(14,4, f[2]) ;   coutf(14,4, f[3]) ;   cout << endl;
 
     // choose f1 to be the worst point
-    if (f[1] < f[2]) {
+    if (f[1] < f[2]) {   //Switch points 1 and 2
       temp = f[2];
       f[2] = f[1];
       f[1] = temp;
@@ -568,7 +592,7 @@ PSMath::PSLineSearch (Int_t & mode, Double_t hh, Double_t xlimit[],
       x[2] = x[1];
       x[1] = temp;
     } // order f1>f2
-    if (f[1] < f[3]) {
+    if (f[1] < f[3]) {    //Switch points 1 and 3
       temp = f[3];
       f[3] = f[1];
       f[1] = temp;
@@ -576,8 +600,36 @@ PSMath::PSLineSearch (Int_t & mode, Double_t hh, Double_t xlimit[],
       x[3] = x[1];
       x[1] = temp;
     } // order f1>f3
+    if( (x[1] > x[2] && x[1] < x[3]) || (x[1] < x[2] && x[1] > x[3]) ){    //Local maximum between x[2] and x[3]! Continue in direction of steepest descent.
+      if( (f[1] - f[2]) > (f[1] - f[3]) ){  //Continue in direction of x[2]
+	temp = x[3];
+	x[3] = x[2] + x[2] - x[1];
+	if( (x[3] > xlimit[1] - epsx) || (x[3] < xlimit[0] + epsx)) {      //To close to limit. Other direction.
+	  x[3] = temp;
+	  x[2] = x[3];
+	  f[2] = f[3];
+	  x[3] = x[2] + x[2] - x[1];
+	  return x[3];
+	}
+	return x[3];
+      }
+      else{                                //Continue in direction of x[3]
+	temp = x[2];
+	Double_t tempf = f[2];
+	x[2] = x[3];
+	f[2] = f[3];
+	x[3] = x[2] + x[2] - x[1];
+	if( (x[3] > xlimit[1] - epsx) || (x[3] < xlimit[0] + epsx)) {      //To close to limit. Other direction.
+	  x[2] = temp;
+	  f[2] = tempf;
+	  x[3] = x[2] + x[2] - x[1];
+	  return x[3];
+	}
+	return x[3];
+      }
+    }
     // sort x1 -> x2 -> x3 in one direction
-    if (abs (x[1] - x[2]) > abs (x[1] - x[3])) {  // exchange x2 <-> x3
+    else if (fabs(x[1] - x[2]) > fabs(x[1] - x[3])) {  // exchange x2 <-> x3
       temp = f[3];
       f[3] = f[2];
       f[2] = temp;
@@ -613,7 +665,6 @@ PSMath::PSLineSearch (Int_t & mode, Double_t hh, Double_t xlimit[],
         ilimit = 1;
       }
       if (ilimit > -1) {                 // limit xt to xlimit0 <= xt <= xlimit1
-        //	cout << "xt at ilimit " << ilimit << endl;
         xt = xlimit[ilimit] - taufac * (xlimit[ilimit] - x[3]);
       }
       mode = 4;
@@ -627,7 +678,7 @@ PSMath::PSLineSearch (Int_t & mode, Double_t hh, Double_t xlimit[],
 
   else if (mode == 4) {             //  find intervall around minimum
     f[3] = chi2;
-    if (f[3] < f[2]) { //  no minimum found:  shift x1 <- x2 <- x3 and get next x3
+    if (f[3] <= f[2]) { //  no minimum found:  shift x1 <- x2 <- x3 and get next x3
       f[1] = f[2];
       f[2] = f[3];
       x[1] = x[2];
@@ -644,7 +695,7 @@ PSMath::PSLineSearch (Int_t & mode, Double_t hh, Double_t xlimit[],
       }
       if (ilimit > -1) {                 // limit x3 to xlimit0 <= x3 <= xlimit1
         //	cout << "search intervall at ilimit " << ilimit << endl;
-        if (abs (x[3] - xlimit[ilimit]) < epsx) { // Minimum found at limit : finish !
+        if (fabs(x[2] - xlimit[ilimit]) < epsx) { // Minimum found at limit : finish !
           //	  cout << "Minimum found near limit "
           //	       << x[2] << " ~ " << xlimit[ilimit] <<  " ~ " << x[3] << endl;
           f[1] = f[2];
@@ -653,7 +704,7 @@ PSMath::PSLineSearch (Int_t & mode, Double_t hh, Double_t xlimit[],
           x[2] = xlimit[ilimit];
           x[3] = xlimit[ilimit];
           mode = -1;
-          return xlimit[ilimit];
+	  return xlimit[ilimit];
         }
         x[3] = xlimit[ilimit] - taufac * (xlimit[ilimit] - x[2]);
         return x[3];
@@ -679,16 +730,10 @@ PSMath::PSLineSearch (Int_t & mode, Double_t hh, Double_t xlimit[],
 
   else if (mode == 5) { // ------------ find minimum within search range --------------
     ft = chi2;
+    Double_t deltaChi2 = fabs(ft - f[2]);
     //    cout <<" in mode 5    xt  " << xt << "   ft " << ft << endl;
     //    PSVprint("  x ",x,4) ;
-    if (abs (xt - x[2]) < epsx && abs (ft - f[2]) < epsf) { // CONVERGENCE reached
-      x[2] = xt;
-      f[2] = ft;
-      mode = 0;
-      //      cout << "CONVERGENCE reached" << endl;
-      return x[2];
-    }
-
+    
     if (ft < f[2]) {                     // better point found: narrow intervall
       if (xt < x[2]) {
         f[3] = f[2];
@@ -713,6 +758,12 @@ PSMath::PSLineSearch (Int_t & mode, Double_t hh, Double_t xlimit[],
         x[3] = xt;
       }
     }
+
+    if( (fabs(x[1] - x[3]) < epsx && deltaChi2 < epsf) || fabs(x[1] - x[3]) < 0.00001) {// CONVERGENCE reached   Requirement of small deltaChi2 difficult in very steep regions
+      mode = 0;
+      return x[2];
+    }
+    
     //    if (x[3]-x[1]<epsx && f[1]-f[2]<epsf && f[3]-f[2]<epsf ) {    // CONVERGENCE reached
     d21 = x[2] - x[1];
     d31 = x[3] - x[1];
@@ -723,7 +774,7 @@ PSMath::PSLineSearch (Int_t & mode, Double_t hh, Double_t xlimit[],
     //    PSVprint("  x ",x,4) ;
     //    cout << "   d21 " << d21 << "   d31 " << d31 << "   d32 " << d32 << "  xt " << xt << endl;
 
-    if (abs (x[2] - xt) < close * d31) {       // safety for numerical precision
+    if (fabs(x[2] - xt) < close * d31) {       // safety for numerical precision
     //      cout << "close" << xt << endl;
       if (d21 < d32) {
         xt = x[2] + taufac * d31;
@@ -821,11 +872,11 @@ PSMath::PSMinverse (Double_t H[], Double_t Hinv[], Int_t p)
   // for 2*2 and 3*3 inversion also works for a non-symmetric matrix
   Double_t temp;
   if (p == 2) {
-    Double_t det = H[0 * p + 0] * H[1 * p + 1] - H[0 * p + 1] * H[1 * p + 0];
-    Hinv[0 * p + 0] = H[1 * p + 1] / det;
-    Hinv[1 * p + 1] = H[0 * p + 0] / det;
-    Hinv[0 * p + 1] = -H[0 * p + 1] / det;
-    Hinv[1 * p + 0] = -H[1 * p + 0] / det;
+    Double_t det = H[0] * H[3] - H[1] * H[2];
+    Hinv[0] = H[3] / det;
+    Hinv[3] = H[0] / det;
+    Hinv[1] = -H[1] / det;
+    Hinv[2] = -H[2] / det;
   }
   else if (p == 3) {
     //    cout <<" Minverse p=3 " << "\n" ;
@@ -1099,7 +1150,7 @@ PSMath::PSfitCheckLimits (Int_t np, Double_t a[], Double_t h[],
       std::cout << "New: ip " << ip << "  d " << d << "  daN " << daN[ip]
           << "  a " << a[ip] << "  h " << h[ip] << std::endl;
     }
-    if (abs (z - 1.) < 0.0001) {
+    if (fabs(z - 1.) < 0.0001) {
       return 0.;
     }     //    no change of parmeters: end iterations
     else {
@@ -1137,7 +1188,7 @@ PSMath::PSminIterate (Double_t a[], Double_t daN[], Double_t h[], Int_t p,
       iNewton = 0;
       break;
     }
-    if (H[ii * p + ii] * h[ii] < 0.1 * abs (g[ii])) {
+    if (H[ii * p + ii] * h[ii] < 0.1 * fabs(g[ii])) {
       iNewton = 0;
       break;
     }
@@ -1156,12 +1207,12 @@ PSMath::PSminIterate (Double_t a[], Double_t daN[], Double_t h[], Int_t p,
     if (d > 0.) {                // update parameter value in case of positive d
       for (Int_t ii = 0; ii < p; ii++) {
         a[ii] = a[ii] + daN[ii];                 // update parameter value
-        h[ii] = 100. * sqrt (0.00001 * abs (X0 / H[ii * p + ii])); // update step width
+        h[ii] = 100. * sqrt (0.00001 * fabs(X0 / H[ii * p + ii])); // update step width
       }
     }
     else {                              // d < 0   Hesse not positive definit ?!
       for (Int_t ii = 0; ii < p; ii++) {
-        daN[ii] = -h[ii] * g[ii] / abs (g[ii]); // simple step in direction of ngative slope
+        daN[ii] = -h[ii] * g[ii] / fabs(g[ii]); // simple step in direction of ngative slope
         a[ii] = a[ii] + daN[ii];                 // update parameter value
         //    h[ii] = h[ii]  ;                         // reduce step width
         d = 110;
@@ -1170,7 +1221,7 @@ PSMath::PSminIterate (Double_t a[], Double_t daN[], Double_t h[], Int_t p,
   }
   else {                                         // Hesse not positiv definit
     for (Int_t ii = 0; ii < p; ii++) {
-      daN[ii] = -h[ii] * g[ii] / abs (g[ii]); // simple step in direction of ngative slope
+      daN[ii] = -h[ii] * g[ii] / fabs(g[ii]); // simple step in direction of ngative slope
       a[ii] = a[ii] + daN[ii];                     // update parameter value
       //      h[ii] = h[ii]  ;                           // update step width
       d = 110.;
@@ -1198,6 +1249,44 @@ PSMath::PSfuncQuadratic (Double_t a[], Double_t amean[], Double_t F0,
     };
   };
   return F;
+}
+//----------------------------------------------------------------
+Int_t PSMath::PSderivative1 (Int_t icall, Double_t a[], Double_t h[], 
+		      Double_t F, Double_t g[], Double_t H[])
+{
+  // 1-dim case of PSderivative,  see documentation there
+  // g,H will contain derivative and second derivative of F(a)
+  // ready = 1 if derivatives are ready
+
+  Int_t nstep = 3;
+  Int_t iter  ;                       // number of finished iterations
+  Int_t icalc ;                       // current number of function calculations 
+                                      //     within current iteration
+  Int_t ready = -1 ;
+  iter  = icall / nstep ;
+  icalc = icall - iter * nstep ;
+  if (icalc == 0)  { 
+    a[0] = a[0] + h[0];
+  } else if (icalc == 1) {
+    a[0] = a[0] - 2.* h[0] ;
+  } else if (icalc == 2) {
+    a[0] = a[0] + h[0] ;
+  } ;
+
+  if (icalc == 0 ) {
+    g[0] = 0.     ;        // build up derivative
+    H[0] = -2.*F  ;        // build up Hesse 
+  } else if (icalc == 1) {
+    g[0] = g[0] + F  ;        // build up derivative
+    H[0] = H[0] + F  ;        // build up Hesse 
+  } else if (icalc == 2) {
+    g[0] = g[0] - F  ;        // build up derivative
+    H[0] = H[0] + F  ;        // build up Hesse 
+    g[0] = g[0] / (2.*h[0]) ;    // at last step: divide by step width
+    H[0] = H[0] / pow(h[0],2) ;      // at last step: divide by step width
+    ready = 1 ;
+  }
+  return ready ;
 }
 //----------------------------------------------------------------
 Int_t
@@ -1230,6 +1319,8 @@ PSMath::PSderivative (Int_t icall, Int_t np, Double_t a[], Double_t h[],
   //     icall = (np*np+3np+2)/2 ... np*np+np+1   for -- shift of a[0]
 
   //  Double_t chi2,  d ;             // chi2 value and stop criteria for fit
+  if(np == 1)
+    std::cout << "WARNING! Using PSderivative for 1-dim Case! Use PSderivative1 instead!" << std::endl;
 
   Int_t ready = -1;
   Int_t nstep = 1 + 2 * np + np * (np - 1);
@@ -1239,20 +1330,19 @@ PSMath::PSderivative (Int_t icall, Int_t np, Double_t a[], Double_t h[],
   Int_t ia;                          // index of fit parameter to be changed
   Int_t iai, iaj;                    // same for Hesse_ij
 
-  Int_t shiftnom = 0;        //     icall = 0             for nominal a[]
-  Int_t shiftp1 = 1;        //     etc see above
-  Int_t shiftp2 = shiftp1 + np - 1;
-  Int_t shiftm1 = shiftp2 + 1;
-  Int_t shiftm2 = shiftm1 + np - 1;
-  Int_t shiftpp1 = shiftm2 + 1;
-  Int_t shiftpp2 = shiftm2 + np * (np - 1) / 2;
-  Int_t shiftmm1 = shiftpp2 + 1;
-  Int_t shiftmm2 = shiftpp2 + np * (np - 1) / 2;
+  Int_t shiftnom = 0;        //     icall = 0             for nominal a[] //0
+  Int_t shiftp1 = 1;        //     etc see above                          //1
+  Int_t shiftp2 = shiftp1 + np - 1;                                       //1
+  Int_t shiftm1 = shiftp2 + 1;                                            //2
+  Int_t shiftm2 = shiftm1 + np - 1;                                       //2
+  Int_t shiftpp1 = shiftm2 + 1;                                           //3
+  Int_t shiftpp2 = shiftm2 + np * (np - 1) / 2;                           //3
+  Int_t shiftmm1 = shiftpp2 + 1;                                          //4
+  Int_t shiftmm2 = shiftpp2 + np * (np - 1) / 2;                          //3
 
   iter = icall / nstep;
   icalc = icall - iter * nstep;
-  //  cout <<"nstep, icall, iter, icalc= " <<nstep<<"  "<<icall<<"  "<<iter<<"  "<<icalc<<"\n";
-
+  
   Int_t iaold = -1, ia1old = -1, iaiold = -1, iajold = -1;
   Int_t ianew = -1, ia1new = -1, iainew = -1, iajnew = -1;
   Double_t signold = 0., signnew = 0.;
@@ -1260,7 +1350,6 @@ PSMath::PSderivative (Int_t icall, Int_t np, Double_t a[], Double_t h[],
   if (icalc == shiftnom) { //cout <<" Nominal "<< chi2 << "\n" ;
     iaold = -1;
     ianew = 0;
-    ;
     signold = 0.;
     signnew = +1.;
     //  if (icalc == shiftp1) { //cout<<"Derivative + start  "<< chi2 << "\n" ;
@@ -1386,8 +1475,6 @@ PSMath::PSderivative (Int_t icall, Int_t np, Double_t a[], Double_t h[],
 
   if (icalc == shiftnom) {
     chi2iter[0] = chi2;
-    //    cout << "icalc == shiftnom  chi2,chi2iter= " << chi2 <<"  "
-    //    cout << chi2iter[0]<<"\n";
     for (int ii = 0; ii < np; ii++) {
       g[ii] = 0.;                             // build up derivative
       for (int jj = 0; jj < np; jj++) {

@@ -9,21 +9,24 @@
 
 #include "HHV4Vector.h"
 #include "HHEventRecord.h"
+#include <map>
+#include <utility>
 #include <Rtypes.h>
 #include <TH1F.h>
 
+typedef std::map<std::pair<double, double>, double> Chi2Map;
 
 class HHKinFit{
 public:
   HHKinFit(HHEventRecord* recrecord);
   ~HHKinFit();
 
-  
-  void FitNew();
   void Fit();
   void ConstrainE2(Int_t iv4, Int_t iv41, Int_t iv42);
   Double_t Chi2V4(Int_t iv4);
   Double_t Chi2Balance();
+  Chi2Map CreateChi2Map(int NbVariations, int NtauVariations);
+  Chi2Map CreateChi2MapAroundStartvalues(int NbVariations, int NtauVariations);
 
   //Getters
   Double_t GetChi2();
@@ -37,7 +40,13 @@ public:
   HHEventRecord* GetFitrecord();
   double GetPullE(Int_t iv4);
   double GetPullBalance();
+  double GetPullBalanceX();
+  double GetPullBalanceY();
 
+  TLorentzVector GetFitParticle(Int_t iv4) { 
+    HHV4Vector* fitobject = m_fitrecord->GetEntry(iv4);
+    return TLorentzVector(fitobject->Px(), fitobject->Py(), fitobject->Pz(), fitobject->E());
+  }
   
   //Setters
   void SetPrintLevel(Int_t level);
@@ -55,7 +64,7 @@ private:
   Double_t m_chi2_balance;
   Int_t m_convergence;
   Double_t m_fittedmH;
-
+  TMatrixD m_covRecoil;
   Int_t m_printlevel;
   Int_t m_graphicslevel;
 
@@ -66,6 +75,10 @@ private:
   HHEventRecord* m_recrecord;
   HHEventRecord* m_fitrecord;
   HHParticleList* m_particlelist;
+
+  //Just for Chi2Maps
+  Double_t m_tauStartEnergy;
+  Double_t m_bStartEnergy;
 
 };
 

@@ -1,7 +1,8 @@
 #include "../include/HHDiJetKinFitMaster.h"
 
 #include "../include/HHEventRecord.h"
-#include "../include/HHDiJetKinFitNewMini.h"
+#include "../include/HHDiJetKinFit.h"
+//#include "../include/HHDiJetKinFitNewMini.h"
 #include "../include/HHParticleList.h"
 #include "../include/HHPID.h"
 #include "../include/HHV4Vector.h"
@@ -31,8 +32,8 @@ HHDiJetKinFitMaster::doFullFit()
     particlelist->UpdateMass(HHPID::h2, *mh);
 
 
-    //HHDiJetKinFit advancedfitter(&eventrecord_rec);
-    HHDiJetKinFitNewMini advancedfitter(&eventrecord_rec); //Choose Minimiser
+    HHDiJetKinFit advancedfitter(&eventrecord_rec);
+    //HHDiJetKinFitNewMini advancedfitter(&eventrecord_rec); //Choose Minimiser
 
     advancedfitter.SetPrintLevel(2);
     advancedfitter.SetLogLevel(2);
@@ -59,6 +60,8 @@ HHDiJetKinFitMaster::doFullFit()
 
     m_bjet1_fitted = advancedfitter.GetFitJet1();
     m_bjet2_fitted = advancedfitter.GetFitJet2();
+    m_chi2b1 = pow( (advancedfitter.GetFitJet1().E() - m_bjet1->E())/GetBjetResolution(m_bjet1->Eta(),m_bjet1->Et()),2);
+    m_chi2b2 = pow( (advancedfitter.GetFitJet2().E() - m_bjet2->E())/GetBjetResolution(m_bjet2->Eta(),m_bjet2->Et()),2);
   }
 
   delete particlelist;
@@ -76,6 +79,8 @@ HHDiJetKinFitMaster::HHDiJetKinFitMaster(TLorentzVector* bjet1, TLorentzVector* 
   m_chi2Truth = -1.0;
   m_bJet1Diff = -1.0;
   m_bJet2Diff = -1.0;
+  m_chi2b1 = -999.0;
+  m_chi2b2 = -999.0;
   if (truthinput){
     TRandom3 r(0);
     

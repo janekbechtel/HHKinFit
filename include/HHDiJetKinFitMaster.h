@@ -44,6 +44,8 @@ public:
   Double_t m_bJet1DiffPt;
   Double_t m_bJet2DiffPt;
   Double_t m_chi2Truth;
+  Double_t m_chi2b1;
+  Double_t m_chi2b2;
 private:
   //hypotheses
   std::vector< Int_t > m_mh;

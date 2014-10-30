@@ -70,6 +70,9 @@ class PSMath {
 		     Double_t chi2, Double_t chi2iter[],
 		     Double_t g[], Double_t H[]);
 
+  static Int_t PSderivative1(Int_t icall, Double_t a[], Double_t h[], 
+			       Double_t chi2, Double_t g[], Double_t H[]);
+
   static Double_t PSfitMinStep(Int_t np, Double_t a[], Double_t h[], 
 			Double_t chi2iter[],
 			Double_t g[], Double_t H[], Double_t Hinv[], Double_t daN[]);

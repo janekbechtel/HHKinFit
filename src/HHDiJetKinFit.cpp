@@ -169,11 +169,12 @@ std::cout << "<HHDiJetKinFit::Fit>:" << std::endl;
   m_fitrecord->UpdateMothers(HHEventRecord::b1);
 
   // fill initial fit parameters
+  ConstrainE2(HHEventRecord::hb, HHEventRecord::b1, HHEventRecord::b2);
   astart[0] = m_fitrecord->GetEntry(HHEventRecord::b1)->E();         // energy of first b-jet
-  aprec[0] = 0.01;   //0.1                 // precision for fit
+  aprec[0] = 0.01;   //0.1                                           // precision for fit
 
   // fill initial step width
-  h[0] = 0.5*m_fitrecord->GetEntry(HHEventRecord::b1)->dE();        // step width = bjet uncertainty
+  h[0] = 0.5*m_fitrecord->GetEntry(HHEventRecord::b1)->dE();
 
   daN[0] = 1.0;   //0.0                 // initial search direction in Eb-Etau diagonal
 
@@ -199,6 +200,8 @@ std::cout << "<HHDiJetKinFit::Fit>:" << std::endl;
 //    fitrecord->Print("before",0);
 //    std::cout << "new values:" << "(" << alimit[0][0] << ") " << a[1] << std::endl;
     m_fitrecord->UpdateEntry(HHEventRecord::b1)->SetEkeepM(a[0]); // update 4-vectors with fit parameters
+    //HHV4Vector* entry = m_fitrecord->GetEntry(HHEventRecord::b1);
+    //m_fitrecord->UpdateEntry(HHEventRecord::b1)->SetEEtaPhiM(a[0], entry->Eta(), entry->Phi(), entry->M()*a[0]/entry->E());
     ConstrainE2(HHEventRecord::hb, HHEventRecord::b1, HHEventRecord::b2);
 
     m_chi2_b1 = Chi2V4(HHEventRecord::b1);
@@ -283,6 +286,8 @@ HHDiJetKinFit::ConstrainE2(Int_t iv4, Int_t iv41, Int_t iv42)
   if (ID2 == HHPID::q || ID2 == HHPID::c
       || ID2 == HHPID::b || ID2 == HHPID::gluon)
     ID2jet = 1;
+
+  ID2jet = -1;
 
   beta2 = sqrt(E2 * E2 - M2 * M2) / E2;
   if (ID2jet < 0) { // is not a jet
