@@ -22,9 +22,10 @@ HHKinFit::HHKinFit(HHEventRecord* recrecord)
     : m_chi2(-1), m_chi2_b1(-1), m_chi2_b2(-1), m_chi2_balance(-1),
       m_convergence(0), m_fittedmH(-1),
       m_printlevel(1), m_graphicslevel(0),
-      m_maxloops(200),
+      m_maxloops(500),
       m_advancedBalance(kTRUE),
       m_logLevel(0),
+      m_keepMassesConst(0),
       m_recrecord(recrecord), m_fitrecord (new HHEventRecord(*recrecord, "Fit")),
       m_covRecoil(2,2)
 {
@@ -51,7 +52,8 @@ HHKinFit::Fit()
   Double_t aprec[np];
   Double_t daN[np];
   Double_t h[np];
-  Double_t chi2iter[1], aMemory[np], g[np], H[np * np], Hinv[np * np];
+  Double_t chi2iter[1], aMemory[np][5], g[np], H[np * np], Hinv[np * np];
+  Bool_t noNewtonShifts = false;
 
   Int_t iter = 0;             //  number of iterations
   Int_t method = 1;           //  initial fit method, see PSfit()
@@ -70,6 +72,8 @@ HHKinFit::Fit()
   Double_t tau1LowerLimit = m_recrecord->GetEntry(HHEventRecord::tauvis1)->E();
   Double_t tau2LowerLimit = m_recrecord->GetEntry(HHEventRecord::tauvis2)->E();
 
+  m_keepMassesConst = false;
+
   Double_t mhtauHypo =  m_particlelist->GetParticleInfo(HHPID::h1)->M();
   Double_t mhtauReco  = m_recrecord->GetEntry(HHEventRecord::htau)->M();
   Double_t mtau  = m_particlelist->GetParticleInfo(HHPID::tau)->M();
@@ -85,12 +89,12 @@ HHKinFit::Fit()
   TMatrixDEigen eigenmatrix(m_covRecoil);
 
   if (eigenmatrix.GetEigenValues()(0,0)<0 || eigenmatrix.GetEigenValues()(1,1)<0){
+    m_fixedCovMatrix = true;
     m_covRecoil(0,0) = 100;
     m_covRecoil(1,1) = 100;
     m_covRecoil(1,0) = 0;
     m_covRecoil(0,1) = 0;
   }
-  
   
   TMatrixDEigen eigenmatrix2(m_covRecoil);
 
@@ -183,7 +187,8 @@ HHKinFit::Fit()
   m_fitrecord->UpdateMothers(HHEventRecord::tau1);
 
   if (!(maxEtau1>=m_recrecord->GetEntry(HHEventRecord::tauvis1)->E()) ){
-    std::cout << "tautau mass constraint cannot be fulfilled -> reconstructed visible tau energy greater/smaller than maximal/minimal allowed total tau energy." << std::endl;
+    if(m_printlevel > 0)
+      std::cout << "tautau mass constraint cannot be fulfilled -> reconstructed visible tau energy greater/smaller than maximal/minimal allowed total tau energy." << std::endl;
     m_convergence=-1;
     m_chi2=9999;
     m_chi2_b1=9999;
@@ -220,25 +225,42 @@ HHKinFit::Fit()
   double E_bjet2High = bjet2UpperLimit;
   if( E_bjet2Low <= 0.01)
     E_bjet2Low = 0.01;
-  m_fitrecord->UpdateEntry(HHEventRecord::b2)->SetEEtaPhiM(E_bjet2Low,                              //Set b2 to lower b2 limit
-							   bjet2_entry->Eta(),
-							   bjet2_entry->Phi(),
-							   bjet2_entry->M() * E_bjet2Low/E_bjet2 );
+
+    if (m_logLevel>1)
+    std::cout << "Setting bjet 2 Energy to " << E_bjet2Low << std::endl;
+
+  if(m_keepMassesConst)
+    m_fitrecord->UpdateEntry(HHEventRecord::b2)->SetEkeepM(E_bjet2Low);
+  else
+    m_fitrecord->UpdateEntry(HHEventRecord::b2)->SetEEtaPhiM(E_bjet2Low,                              //Set b2 to lower b2 limit
+							     bjet2_entry->Eta(),
+							     bjet2_entry->Phi(),
+							     bjet2_entry->M() * E_bjet2Low/E_bjet2 );
 
   ConstrainE2(HHEventRecord::hb, HHEventRecord::b2, HHEventRecord::b1);                             //Calculate b1 with b2 fixed
   if(alimit[0][1] > m_fitrecord->GetEntry(HHEventRecord::b1)->E()){
     alimit[0][1] = m_fitrecord->GetEntry(HHEventRecord::b1)->E();                                   //Modify b1 limit if b2 limit is tighter
+    if (m_logLevel>1)
+      std::cout << "Upper bjet 1 limit is now " << alimit[0][1] << std::endl;
   }
 
-  m_fitrecord->UpdateEntry(HHEventRecord::b2)->SetEEtaPhiM(E_bjet2High,                             //Set b2 to upper b2 limit
-							   bjet2_entry->Eta(),
-							   bjet2_entry->Phi(),
-							   bjet2_entry->M() * E_bjet2High/E_bjet2Low );
+  if (m_logLevel>1)
+    std::cout << "Setting bjet 2 Energy to " << E_bjet2High << std::endl;
 
+  if(m_keepMassesConst)
+    m_fitrecord->UpdateEntry(HHEventRecord::b2)->SetEkeepM(E_bjet2High);
+  else
+    m_fitrecord->UpdateEntry(HHEventRecord::b2)->SetEEtaPhiM(E_bjet2High,                             //Set b2 to upper b2 limit
+							     bjet2_entry->Eta(),
+							     bjet2_entry->Phi(),
+							     bjet2_entry->M() * E_bjet2High/E_bjet2Low );
+  
   ConstrainE2(HHEventRecord::hb, HHEventRecord::b2, HHEventRecord::b1);                             //Calculate b1 with b2 fixed
   if(alimit[0][0] < m_fitrecord->GetEntry(HHEventRecord::b1)->E()){
     alimit[0][0] = m_fitrecord->GetEntry(HHEventRecord::b1)->E();                                   //Modify b1 limit if b2 limit is tighter
-  }                                 
+    if (m_logLevel>1)
+      std::cout << "Lower bjet 1 limit is now " << alimit[0][0] << std::endl;
+  }
   
   //Fill initial bjet fit parameters
   if(alimit[0][1] - alimit[0][0] > 0.5*m_fitrecord->GetEntry(HHEventRecord::b1)->dE()){
@@ -254,10 +276,12 @@ HHKinFit::Fit()
     return;
   }
   
-
   HHV4Vector* bjet1_entry = m_fitrecord->GetEntry(HHEventRecord::b1);
   Double_t bjet1_entryEnergy = bjet1_entry->E();
-  m_fitrecord->UpdateEntry(HHEventRecord::b1)->SetEEtaPhiM(astart[0], bjet1_entry->Eta(), bjet1_entry->Phi(), bjet1_entry->M()*astart[0]/bjet1_entryEnergy); 
+  if(m_keepMassesConst)
+    m_fitrecord->UpdateEntry(HHEventRecord::b1)->SetEkeepM(astart[0]);
+  else
+    m_fitrecord->UpdateEntry(HHEventRecord::b1)->SetEEtaPhiM(astart[0], bjet1_entry->Eta(), bjet1_entry->Phi(), bjet1_entry->M()*astart[0]/bjet1_entryEnergy); 
   ConstrainE2(HHEventRecord::hb, HHEventRecord::b1, HHEventRecord::b2);
   
   alimit[1][0] = minEtau1;              // tau: minimum is visible tau1 energy
@@ -275,7 +299,11 @@ HHKinFit::Fit()
     a[ip] = astart[ip];
   }
   for (Int_t ip = 0; ip < np; ip++) {
-    aMemory[ip] = -999.0;
+    aMemory[ip][0] = -999.0;
+    aMemory[ip][1] = -995.0;
+    aMemory[ip][2] = -990.0;
+    aMemory[ip][3] = -985.0;
+    aMemory[ip][3] = -980.0;
   }
 
   static const Int_t nloopmax = 100;
@@ -291,24 +319,22 @@ HHKinFit::Fit()
     std::cout << "Starting FitLoop! Start-Values: " << std::endl;
     std::cout << "Fit Params: " << std::endl;
     std::cout << "Eb1: " << m_fitrecord->GetEntry(HHEventRecord::b1)->E() << " Eb2: " << m_fitrecord->GetEntry(HHEventRecord::b2)->E() << std::endl;
+    std::cout << "Eb1 Lower Limit: " << alimit[0][0] << "Eb1 Upper Limit: " << alimit[0][1] << std::endl; 
+    std::cout << "Eb1 Precision is : " << aprec[0] << std::endl;
     std::cout << "Etau1: " << m_fitrecord->GetEntry(HHEventRecord::tau1)->E() << " Etau2: " << m_fitrecord->GetEntry(HHEventRecord::tau2)->E() << std::endl;
+    std::cout << "ETau1 Lower Limit: " << alimit[1][0] << "ETau1 Upper Limit: " << alimit[1][1] << std::endl; 
+    std::cout << "Etau1 Precision is : " << aprec[1] << std::endl;
     std::cout << "HH Px: " << m_fitrecord->GetEntry(HHEventRecord::H)->Px() << " HH Py: " << m_fitrecord->GetEntry(HHEventRecord::H)->Py() << std::endl;
   }
 
   for (Int_t iloop = 0; iloop < m_maxloops * 10 && iter < m_maxloops; iloop++) { // FIT loop
-    //    chi2        = testfunction(a,np) ;
-    //    std::cout << "V4KinFit  in loop iloop " << iloop << std::endl;
-
-//    fitrecord->Print("before",0);
-//    std::cout << "new values:" << "(" << alimit[0][0] << "-" << alimit[0][1] << ") " << a[0] << "--- (" << alimit[1][0] << "-" << alimit[1][1] << ") " << a[1] << std::endl;
     
-
-    //Change b1 Mass and b2 Mass or none of them. By default ConstrainE2 changes the B2 Mass.
-
-    //m_fitrecord->UpdateEntry(HHEventRecord::b1)->SetEkeepM(a[0]); // update 4-vectors with fit parameters (No Mass Change)
-
-    HHV4Vector* entry = m_fitrecord->GetEntry(HHEventRecord::b1);
-    m_fitrecord->UpdateEntry(HHEventRecord::b1)->SetEEtaPhiM(a[0], entry->Eta(), entry->Phi(), entry->M()*a[0]/entry->E()); //Change b2 Mass
+    if(m_keepMassesConst)
+      m_fitrecord->UpdateEntry(HHEventRecord::b1)->SetEkeepM(a[0]); // update 4-vectors with fit parameters (No Mass Change)
+    else{
+      HHV4Vector* entry = m_fitrecord->GetEntry(HHEventRecord::b1);
+      m_fitrecord->UpdateEntry(HHEventRecord::b1)->SetEEtaPhiM(a[0], entry->Eta(), entry->Phi(), entry->M()*a[0]/entry->E()); //Change b2 Mass
+    }
 
     m_fitrecord->UpdateEntry(HHEventRecord::tau1)->SetEkeepM(a[1]);
     ConstrainE2(HHEventRecord::hb, HHEventRecord::b1, HHEventRecord::b2);
@@ -320,8 +346,14 @@ HHKinFit::Fit()
     m_chi2 = m_chi2_b1 + m_chi2_b2 + m_chi2_balance; // chi2 calculation
 
     if (m_logLevel>1){
+      std::cout << std::setprecision(9);
       std::cout << "Fit Params: " << std::endl;
-      std::cout << "Eb1: " << a[0] << " Etau1: " << a[1] << std::endl;
+      std::cout << "Eb1:   " << a[0] << " Etau1:   " << a[1] << std::endl;
+      if (m_logLevel>3){
+	std::cout << "Eb1FR: " << m_fitrecord->GetEntry(HHEventRecord::b1)->E() << " Etau1FR: " << m_fitrecord->GetEntry(HHEventRecord::tau1)->E() << std::endl;
+	std::cout << "Eb2FR: " << m_fitrecord->GetEntry(HHEventRecord::b2)->E() << " Etau2FR: " << m_fitrecord->GetEntry(HHEventRecord::tau2)->E() << std::endl;
+      }
+      std::cout << std::setprecision(6);
       std::cout << "chi2 b1: " << m_chi2_b1 << std::endl;
       std::cout << "chi2 b2: " << m_chi2_b2 << std::endl;
       std::cout << "chi2 missing: " << m_chi2_balance << std::endl;
@@ -363,7 +395,7 @@ HHKinFit::Fit()
     if (m_convergence != 0) {
       break;
     }
-    m_convergence = PSMath::PSfit(iloop, iter, method, mode, m_printlevel,
+    m_convergence = PSMath::PSfit(iloop, iter, method, mode, noNewtonShifts, m_printlevel,
                                   np, a, astart, alimit, aprec,
                                   daN, h, aMemory, m_chi2, chi2iter, g, H,
                                   Hinv);
@@ -491,65 +523,79 @@ HHKinFit::Fit()
 void
 HHKinFit::ConstrainE2(Int_t iv4, Int_t iv41, Int_t iv42)
 {
-
-  Int_t ID2 = m_fitrecord->GetEntry(iv42)->ID();
-  //if (ID2 == HHPID::tau)
-  //  m_fitrecord->Print("Fit Record Before Update Mothers:");
-  m_fitrecord->UpdateMothers(iv41);
-  //if (ID2 == HHPID::tau)
-  //  m_fitrecord->Print("Fit Record Before Constraining:");
   Double_t M1, M2, M, Mc, E1, E2, b2, beta2;
-  M = m_fitrecord->GetEntry(iv4)->M();
+  m_fitrecord->UpdateMothers(iv41);
   Mc = m_particlelist->GetParticleInfo( m_fitrecord->GetEntry(iv4)->ID() )->M();
-  E1 = m_fitrecord->GetEntry(iv41)->E();
-  M1 = m_fitrecord->GetEntry(iv41)->M();
-  E2 = m_fitrecord->GetEntry(iv42)->E();
-  M2 = m_fitrecord->GetEntry(iv42)->M();
+  M = m_fitrecord->GetEntry(iv4)->M();
 
-  if (M2 == 0.) { // massless case
-    m_fitrecord->UpdateEntry(iv42)->SetEkeepM(E2 * (Mc / M) * (Mc / M)); // only changes absolute value and keeps eta, phi, m untouched
-                                                                         // such that invariant mass of 1 and 2 gives correct mass Mc
+  int loopCount = 0;
+  
+  while(fabs(M-Mc) > 0.000001){
+    loopCount++;
+    Int_t ID2 = m_fitrecord->GetEntry(iv42)->ID();
+    if (ID2 == HHPID::tau && m_logLevel > 3)
+      m_fitrecord->Print("Fit Record Before Constraining:");
+    E1 = m_fitrecord->GetEntry(iv41)->E();
+    M1 = m_fitrecord->GetEntry(iv41)->M();
+    E2 = m_fitrecord->GetEntry(iv42)->E();
+    M2 = m_fitrecord->GetEntry(iv42)->M();
+    
+    if (M2 == 0.) { // massless case
+      if(m_logLevel > 0)
+	std::cout << "Massless case!" << std::endl;
+      m_fitrecord->UpdateEntry(iv42)->SetEkeepM(E2 * (Mc / M) * (Mc / M)); // only changes absolute value and keeps eta, phi, m untouched
+      // such that invariant mass of 1 and 2 gives correct mass Mc
+      m_fitrecord->UpdateMothers(iv42);
+      return;
+    }
+    
+    Int_t ID2jet = -1;
+    
+    if (ID2 == HHPID::q || ID2 == HHPID::c
+	|| ID2 == HHPID::b || ID2 == HHPID::gluon)
+      ID2jet = 1;
+    
+    if(m_keepMassesConst)
+    ID2jet = -1;
+    
+    beta2 = sqrt(E2 * E2 - M2 * M2) / E2;
+    if (ID2jet < 0) { // is not a jet
+      b2 = (M2 / E2) * (M2 / E2); // isn't the no jet case identical to the jet case? 1/gamma**2 = m**2/E**2 = 1-beta**2
+    }
+    else { // is a jet
+      b2 = 1 - beta2 * beta2;
+    }
+
+    //std::cout << "beta2   b2: " << beta2 << "  " << b2 << std::endl;  
+    
+    Double_t d = (M * M - M1 * M1 - M2 * M2) / (2. * E1 * E2);
+    Double_t E2lin = (Mc * Mc - M1 * M1) / (2. * E1 * d);
+    Double_t E2N = E1 * d / b2;
+    Double_t E2new = E2N * (-1. + sqrt(1. + 2. * E2lin / E2N));
+    
+    //std::cout << "d, E2lin, E2N, E2new: " << d << "  " << E2lin << "  " << E2N << "  " << E2new << std::endl;  
+    
+    if (ID2jet < 0) { // is not a jet
+      m_fitrecord->UpdateEntry(iv42)->SetEkeepM(E2new);
+    }
+    else { // is a jet
+      HHV4Vector* entry = m_fitrecord->GetEntry(iv42);
+      m_fitrecord->UpdateEntry(iv42)->SetEEtaPhiM(E2new, entry->Eta(), entry->Phi(), M2 * E2new / E2);
+      if(m_logLevel > 2)
+	std::cout << "Jet Masses are now - BJet1 Mass: " << m_fitrecord->GetEntry(iv41)->M() << " BJet2 Mass: " << m_fitrecord->GetEntry(iv42)->M() << std::endl;
+    }
+    
     m_fitrecord->UpdateMothers(iv42);
-    return;
+    M = m_fitrecord->GetEntry(iv4)->M();
+
+    if (ID2 == HHPID::tau && m_logLevel > 3 )
+      m_fitrecord->Print("Fit Record After Constraining:");
   }
 
-  Int_t ID2jet = -1;
-
-  if (ID2 == HHPID::q || ID2 == HHPID::c
-      || ID2 == HHPID::b || ID2 == HHPID::gluon)
-    ID2jet = 1;
-
-  //ID2jet = -1;
-
-  beta2 = sqrt(E2 * E2 - M2 * M2) / E2;
-  if (ID2jet < 0) { // is not a jet
-    b2 = (M2 / E2) * (M2 / E2); // isn't the no jet case identical to the jet case? 1/gamma**2 = m**2/E**2 = 1-beta**2
-  }
-  else { // is a jet
-    b2 = 1 - beta2 * beta2;
+  if(m_logLevel > 1){
+    std::cout << "Did Mass Constraint Loop " << loopCount << " times." << std::endl;
   }
 
-  //std::cout << "beta2   b2: " << beta2 << "  " << b2 << std::endl;  
-
-  Double_t d = (M * M - M1 * M1 - M2 * M2) / (2. * E1 * E2);
-  Double_t E2lin = (Mc * Mc - M1 * M1) / (2. * E1 * d);
-  Double_t E2N = E1 * d / b2;
-  Double_t E2new = E2N * (-1. + sqrt(1. + 2. * E2lin / E2N));
-
-  //std::cout << "d, E2lin, E2N, E2new: " << d << "  " << E2lin << "  " << E2N << "  " << E2new << std::endl;  
-
-  if (ID2jet < 0) { // is not a jet
-    m_fitrecord->UpdateEntry(iv42)->SetEkeepM(E2new);
-  }
-  else { // is a jet
-    HHV4Vector* entry = m_fitrecord->GetEntry(iv42);
-    m_fitrecord->UpdateEntry(iv42)->SetEEtaPhiM(E2new, entry->Eta(), entry->Phi(), M2 * E2new / E2);
-  }
-
-  m_fitrecord->UpdateMothers(iv42);
-
-  //if (ID2 == HHPID::tau)
-  //  m_fitrecord->Print("Fit Record After Constraining:");
 }
 
 Double_t
@@ -716,13 +762,22 @@ Chi2Map HHKinFit::CreateChi2Map(int NbVariations, int NtauVariations){
   HHV4Vector* tau1entry = m_fitrecord->GetEntry(HHEventRecord::tau1);
   double tau1FitEnergy = tau1entry->E();
 
-  for(int bVariation = 0; bVariation < NbVariations; ++bVariation){
-    for(int tauVariation = 0; tauVariation < NtauVariations; ++tauVariation){
-      double b1Energy = b1FitEnergy + (2*(float)bVariation/(float)NbVariations - 1.0) * b1entry->dE();
+
+  for(int bVariation = 0; bVariation <= NbVariations; ++bVariation){
+    for(int tauVariation = 0; tauVariation <= NtauVariations; ++tauVariation){
+      double b1Energy;
+      if(NbVariations != 0)
+	b1Energy = b1FitEnergy + (2.0*(float)bVariation/(float)NbVariations - 1.0) * 5.0* m_fitrecord->GetEntry(HHEventRecord::b1)->dE();
+      else
+	b1Energy = b1FitEnergy;
       if(b1Energy < 0.01)
 	b1Energy = 0.01;
 
-      double tau1Energy = tau1FitEnergy + (2*(float)tauVariation/(float)NtauVariations - 1.0) * 0.5 * tau1FitEnergy;
+      double tau1Energy;
+      if(NtauVariations != 0)
+	tau1Energy = tau1FitEnergy + (2.0*(float)tauVariation/(float)NtauVariations - 1.0) * 0.7 * tau1FitEnergy;
+      else
+	tau1Energy = tau1FitEnergy;
 
       std::pair<double, double> energies = std::pair<double, double>(b1Energy, tau1Energy);
 
@@ -735,6 +790,22 @@ Chi2Map HHKinFit::CreateChi2Map(int NbVariations, int NtauVariations){
       double chi2_b2 = Chi2V4(HHEventRecord::b2);
       double chi2_balance = Chi2Balance();
       double chi2 = chi2_b1 + chi2_b2 + chi2_balance;
+
+      if (m_logLevel>1){
+	std::cout << "Fit Params: " << std::endl;
+	std::cout << std::setprecision(9);
+	std::cout << "Eb1: " << b1Energy << " Etau1: " << tau1Energy << std::endl;
+	std::cout << "Eb1FR: " << m_fitrecord->GetEntry(HHEventRecord::b1)->E() << " Etau1FR: " << m_fitrecord->GetEntry(HHEventRecord::tau1)->E() << std::endl;
+	std::cout << "Eb2FR: " << m_fitrecord->GetEntry(HHEventRecord::b2)->E() << " Etau2FR: " << m_fitrecord->GetEntry(HHEventRecord::tau2)->E() << std::endl;
+	std::cout << std::setprecision(6);
+	std::cout << "chi2 b1: " << chi2_b1 << std::endl;
+	std::cout << "chi2 b2: " << chi2_b2 << std::endl;
+	std::cout << "chi2 missing: " << chi2_balance << std::endl;
+	std::cout << "------------------" << std::endl;
+	std::cout << "chi2 : " << chi2 << std::endl;
+	std::cout << "------------------" << std::endl;
+	std::cout << "------------------" << std::endl;
+      }
 
       returnMap.insert(std::pair<std::pair<double, double>, double>(energies, chi2));
     }

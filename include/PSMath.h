@@ -7,9 +7,9 @@ class PSMath {
  public:
   PSMath();
   static Int_t PSfit(Int_t iloop, Int_t &iter, Int_t &method, Int_t &mode,  
-	      Int_t printlevel,
+	      Bool_t &noNewtonShifts, Int_t printlevel,
 	      Int_t np, Double_t a[], Double_t astart[], Double_t alimit[][2], 
-	      Double_t aprec[], Double_t daN[], Double_t h[], Double_t aMemory[],
+	      Double_t aprec[], Double_t daN[], Double_t h[], Double_t aMemory[][5],
 	      Double_t chi2, Double_t chi2iter[], Double_t g[], Double_t H[], Double_t Hinv[] );
 
   static void PSNewtonLimitShift(Int_t sign, Int_t np, Double_t a[], Double_t alimit[][2], Double_t aprec[],
@@ -17,7 +17,7 @@ class PSMath {
   
   static Double_t PSNewtonAnalyzer(Int_t np, Double_t a[], Double_t alimit[][2], Double_t aprec[],
 			    Double_t daN[], Double_t h[], 
-			    Double_t g[], Double_t H[], Double_t Hinv[], Double_t chi2, Int_t printlevel=1);
+			    Double_t g[], Double_t H[], Double_t Hinv[], Double_t chi2, Bool_t noNewtonShifts, Int_t printlevel=1);
 
   static void PSfitShow(Int_t iloop, Int_t convergence, Int_t iter, 
 		 Int_t method, Int_t mode, 
@@ -28,7 +28,7 @@ class PSMath {
 
   static Double_t PSLineSearch(Int_t & mode, Double_t hh, Double_t xlimit[], 
 			Double_t epsx, Double_t epsf, Double_t x[4], Double_t f[], 
-			Double_t chi2 );
+			Double_t chi2 , Int_t printlevel);
 
   static void PSLineLimit(Int_t np, Double_t astart[], Double_t daN[], Double_t alimit[][2], Double_t xlimit[] );
 

@@ -56,7 +56,7 @@ public:
   void SetAdvancedBalance(Bool_t flag);
   void SetLogLevel(Int_t level);
 
-
+  bool m_fixedCovMatrix;
 private:
   Double_t m_chi2;
   Double_t m_chi2_b1;
@@ -70,6 +70,7 @@ private:
 
   Int_t m_maxloops;
   Bool_t m_advancedBalance;
+  Bool_t m_keepMassesConst;
   Int_t m_logLevel;
 
   HHEventRecord* m_recrecord;

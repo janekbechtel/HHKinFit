@@ -48,8 +48,8 @@ HHTauInputKinFit::Fit()
   Double_t aprec[np];
   Double_t daN[np];
   Double_t h[np];
-  Double_t chi2iter[1], aMemory[np], g[np], H[np * np], Hinv[np * np];
-
+  Double_t chi2iter[1], aMemory[np][5], g[np], H[np * np], Hinv[np * np];
+  Bool_t noNewtonShifts = false;
   Int_t iter = 0;             //  number of iterations
   Int_t method = 1;           //  initial fit method, see PSfit()
   Int_t mode = 1;             //  mode =1 for start of a new fit by PSfit()
@@ -148,7 +148,7 @@ HHTauInputKinFit::Fit()
     if (m_convergence != 0) {
       break;
     }
-    m_convergence = PSMath::PSfit(iloop, iter, method, mode, m_printlevel,
+    m_convergence = PSMath::PSfit(iloop, iter, method, mode, noNewtonShifts, m_printlevel,
                                   np, a, astart, alimit, aprec,
                                   daN, h, aMemory, m_chi2, chi2iter, g, H,
                                   Hinv);
