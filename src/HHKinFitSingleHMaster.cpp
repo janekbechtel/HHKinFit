@@ -1,10 +1,10 @@
-#include "../include/HHKinFitSingleHMaster.h"
+#include "HHKinFit/interface/HHKinFitSingleHMaster.h"
 
-#include "../include/HHEventRecordSingleH.h"
-#include "../include/HHKinFitSingleH.h"
-#include "../include/HHParticleList.h"
-#include "../include/HHPID.h"
-#include "../include/HHV4Vector.h"
+#include "HHKinFit/interface/HHEventRecordSingleH.h"
+#include "HHKinFit/interface/HHKinFitSingleH.h"
+#include "HHKinFit/interface/HHParticleList.h"
+#include "HHKinFit/interface/HHPID.h"
+#include "HHKinFit/interface/HHV4Vector.h"
 #include "TMatrixD.h"
 
 #include "TRandom3.h"

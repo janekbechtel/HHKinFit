@@ -1,10 +1,10 @@
-#include "../include/HHKinFitMaster.h"
+#include "HHKinFit/interface/HHKinFitMaster.h"
 
-#include "../include/HHEventRecord.h"
-#include "../include/HHKinFit.h"
-#include "../include/HHParticleList.h"
-#include "../include/HHPID.h"
-#include "../include/HHV4Vector.h"
+#include "HHKinFit/interface/HHEventRecord.h"
+#include "HHKinFit/interface/HHKinFit.h"
+#include "HHKinFit/interface/HHParticleList.h"
+#include "HHKinFit/interface/HHPID.h"
+#include "HHKinFit/interface/HHV4Vector.h"
 #include "TMatrixD.h"
 
 #include "TRandom3.h"
@@ -211,7 +211,6 @@ HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLo
     bjet1Cov(0,0) = pow(cos(bjet1->Phi())*bjet1_dpt,2);                           bjet1Cov(0,1) = sin(bjet1->Phi())*cos(bjet1->Phi())*bjet1_dpt*bjet1_dpt;
     bjet1Cov(1,0) = sin(bjet1->Phi())*cos(bjet1->Phi())*bjet1_dpt*bjet1_dpt;      bjet1Cov(1,1) = pow(sin(bjet1->Phi())*bjet1_dpt,2);
    
-    Double_t bjet2_res = GetBjetResolution(bjet2->Eta(), bjet2->Et());
     m_bjet2Smear = GetBjetResolution(bjet2->Eta(), bjet2->Et());
     Double_t bjet2_E  = r.Gaus(bjet2->E(), m_bjet2Smear);
     Double_t bjet2_P  = sqrt(pow(bjet2_E,2) - pow(bjet2->M(),2));

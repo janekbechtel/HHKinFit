@@ -3,26 +3,26 @@
  *
  */
 
-#ifndef HHKinFit_HHDIJETKINFITNEWMINI_H_
-#define HHKinFit_HHDIJETKINFITNEWMINI_H_
+#ifndef HHKinFit_HHDIJETKINFIT_H_
+#define HHKinFit_HHDIJETKINFIT_H_
 
-#include "../include/HHV4Vector.h"
-#include "../include/HHEventRecord.h"
+#include "HHKinFit/interface/HHV4Vector.h"
+#include "HHKinFit/interface/HHEventRecord.h"
 #include <Rtypes.h>
 #include <TH1F.h>
-#include <TVectorD.h>
 
-class HHDiJetKinFitNewMini{
+class HHDiJetKinFit{
 public:
-  HHDiJetKinFitNewMini(HHEventRecord* recrecord);
-  ~HHDiJetKinFitNewMini();
+  HHDiJetKinFit(HHEventRecord* recrecord);
+  ~HHDiJetKinFit();
 
+  
+  
+  void FitNew();
   void Fit();
   void ConstrainE2(Int_t iv4, Int_t iv41, Int_t iv42);
   Double_t Chi2V4(Int_t iv4);
 
-  Double_t CalcChi2(TVectorD par);
-  
   //Getters
   Double_t GetChi2();
   Double_t GetChi2_b1();
@@ -72,4 +72,4 @@ private:
 
 
 
-#endif
+#endif /* HHDIJETKINFIT_H_ */

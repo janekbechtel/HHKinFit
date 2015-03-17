@@ -8,7 +8,7 @@
 #include <Rtypes.h>
 #include <TString.h>
 #include <cmath>
-#include "HHPID.h"
+#include "HHKinFit/interface/HHPID.h"
 #include "TLorentzVector.h"
 #include "TMatrixD.h"
 #include "Math/Vector3D.h"

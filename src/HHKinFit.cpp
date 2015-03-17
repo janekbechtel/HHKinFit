@@ -4,9 +4,9 @@
  *  Created on: Jun 17, 2014
  */
 
-#include "../include/HHKinFit.h"
-#include "../include/PSMath.h"
-#include "../include/PSTools.h"
+#include "HHKinFit/interface/HHKinFit.h"
+#include "HHKinFit/interface/PSMath.h"
+#include "HHKinFit/interface/PSTools.h"
 
 #include "TString.h"
 #include "TPad.h"
@@ -126,29 +126,9 @@ HHKinFit::Fit()
   }
                                     
 
-  //firstly, compute upper limit of E(tau1) by having set E(tau2)=E(tau2)_min and compute E(tau1)
+  //Compute upper limit of E(tau1) by having set E(tau2)=E(tau2)_min and compute E(tau1)
   ConstrainE2(HHEventRecord::htau, HHEventRecord::tau2, HHEventRecord::tau1);
   Double_t maxEtau1 = m_fitrecord->GetEntry(HHEventRecord::tau1)->E();
-
-
-  /*
-  //secondly, compute lower limit of E(tau1) by setting E(tau1)=E(tauvis1) and compute E(tau2)
-  //and check whether E(tau2)<E(tauvis2)
-  if(m_recrecord->GetEntry(HHEventRecord::tauvis1)->E() > mtau){
-    m_fitrecord->UpdateEntry(HHEventRecord::tau1)->SetEEtaPhiM(m_recrecord->GetEntry(HHEventRecord::tauvis1)->E(),
-							       m_recrecord->GetEntry(HHEventRecord::tauvis1)->Eta(),
-							       m_recrecord->GetEntry(HHEventRecord::tauvis1)->Phi(),
-							       mtau);
-  }
-  else{
-    m_fitrecord->UpdateEntry(HHEventRecord::tau1)->SetEEtaPhiM(pow(m_recrecord->GetEntry(HHEventRecord::tauvis1)->P(),2)+pow(mtau,2),
-							       m_recrecord->GetEntry(HHEventRecord::tauvis1)->Eta(),
-							       m_recrecord->GetEntry(HHEventRecord::tauvis1)->Phi(),
-							       mtau);
-  }
-  ConstrainE2(HHEventRecord::htau, HHEventRecord::tau1, HHEventRecord::tau2);
-  */
-  
   Double_t minEtau1 = tau1LowerLimit;
 
 

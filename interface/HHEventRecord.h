@@ -1,5 +1,5 @@
 /*
- * HHEventRecordSingleH.h
+ * HHEventRecord.h
  *
  *  Created on: 16.06.2014
  */
@@ -7,29 +7,36 @@
 #ifndef EVENTRECORD_H_
 #define EVENTRECORD_H_
 
-#include "HHV4Vector.h"
-#include "HHParticleList.h"
+#include "HHKinFit/interface/HHV4Vector.h"
+#include "HHKinFit/interface/HHParticleList.h"
 #include <vector>
 #include <TString.h>
 
 
-class HHEventRecordSingleH{
+class HHEventRecord{
 public:
   enum entry{
     undef = -1,
+//    UE = 0,    // underlying event
+//    ISR = 1,   // ISR gluon jet
     MET = 0,   // MET
-    htau = 1,  // h --> tau1 tau2
-    tau1 = 2,  // tau1
-    tau2 = 3,  // tau2
-    tauvis1   = 4,   // mu1
-    tauinvis1 = 5,  // nu1
-    tauvis2   = 6,  // mu2
-    tauinvis2 = 7  // nu2
+
+    H = 1,     // H
+    htau = 2,  // h --> tau1 tau2
+    hb = 3,    // h --> b1 b2
+    tau1 = 4,  // tau1
+    tau2 = 5,  // tau2
+    b1 = 6,    // b1
+    b2 = 7,    // b2
+    tauvis1   = 8,   // mu1
+    tauinvis1 = 9,  // nu1
+    tauvis2   = 10,  // mu2
+    tauinvis2 = 11  // nu2
   };
 
-  HHEventRecordSingleH (HHParticleList* particlelist);
-  HHEventRecordSingleH (const HHEventRecordSingleH& eventrecord, TString suffix="");
-  ~HHEventRecordSingleH ();
+  HHEventRecord (HHParticleList* particlelist);
+  HHEventRecord (const HHEventRecord& eventrecord, TString suffix="");
+  ~HHEventRecord ();
 
   Int_t AddInitialEntry (HHPID::pid id);
   void MakeHEvent ();

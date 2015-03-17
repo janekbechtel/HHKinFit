@@ -4,8 +4,8 @@
  *  Created on: 17.06.2014
  */
 
-#include "../include/HHEventRecordSingleH.h"
-#include "../include/PSTools.h"
+#include "HHKinFit/interface/HHEventRecordSingleH.h"
+#include "HHKinFit/interface/PSTools.h"
 #include <iostream>
 
 HHEventRecordSingleH::HHEventRecordSingleH(HHParticleList* particlelist)

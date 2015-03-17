@@ -1,9 +1,9 @@
-#include "../include/HHV4Vector.h"
+#include "HHKinFit/interface/HHV4Vector.h"
 
 #include <TArrow.h>
 #include <iostream>
 
-#include "../include/PSTools.h"
+#include "HHKinFit/interface/PSTools.h"
 
 HHV4Vector::HHV4Vector(Double_t e, Double_t eta, Double_t phi, Double_t m)
     : m_e(e), m_eta(eta), m_phi(phi), m_m(m), m_dE(0), m_dEta(0), m_dPhi(0),

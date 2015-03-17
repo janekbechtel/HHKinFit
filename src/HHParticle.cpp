@@ -1,5 +1,5 @@
-#include "../include/HHParticle.h"
-#include "../include/PSTools.h"
+#include "HHKinFit/interface/HHParticle.h"
+#include "HHKinFit/interface/PSTools.h"
 
 #include <iostream>
 

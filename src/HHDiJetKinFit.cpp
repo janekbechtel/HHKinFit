@@ -5,9 +5,9 @@
  *      Author: vormwald
  */
 
-#include "../include/HHDiJetKinFit.h"
-#include "../include/PSMath.h"
-#include "../include/PSTools.h"
+#include "HHKinFit/interface/HHDiJetKinFit.h"
+#include "HHKinFit/interface/PSMath.h"
+#include "HHKinFit/interface/PSTools.h"
 
 #include "TString.h"
 #include "TPad.h"

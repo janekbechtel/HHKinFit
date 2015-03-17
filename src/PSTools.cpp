@@ -1,4 +1,4 @@
-#include "../include/PSTools.h"
+#include "HHKinFit/interface/PSTools.h"
 
 // #include <RooEllipse.h>
 #include <Rtypes.h>
