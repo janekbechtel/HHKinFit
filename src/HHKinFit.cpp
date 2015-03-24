@@ -4,9 +4,9 @@
  *  Created on: Jun 17, 2014
  */
 
-#include "HHKinFit/interface/HHKinFit.h"
-#include "HHKinFit/interface/PSMath.h"
-#include "HHKinFit/interface/PSTools.h"
+#include "HHKinFit/HHKinFit/interface/HHKinFit.h"
+#include "HHKinFit/HHKinFit/interface/PSMath.h"
+#include "HHKinFit/HHKinFit/interface/PSTools.h"
 
 #include "TString.h"
 #include "TPad.h"
@@ -19,15 +19,15 @@
 #include <iostream>
 
 HHKinFit::HHKinFit(HHEventRecord* recrecord)
-    : m_chi2(-1), m_chi2_b1(-1), m_chi2_b2(-1), m_chi2_balance(-1),
-      m_convergence(0), m_fittedmH(-1),
-      m_printlevel(1), m_graphicslevel(0),
-      m_maxloops(500),
-      m_advancedBalance(kTRUE),
-      m_logLevel(0),
-      m_keepMassesConst(0),
-      m_recrecord(recrecord), m_fitrecord (new HHEventRecord(*recrecord, "Fit")),
-      m_covRecoil(2,2)
+  : m_chi2(-1), m_chi2_b1(-1), m_chi2_b2(-1), m_chi2_balance(-1),
+    m_convergence(0), m_fittedmH(-1),
+    m_covRecoil(2,2),
+    m_printlevel(1), m_graphicslevel(0),
+    m_maxloops(500),
+    m_advancedBalance(kTRUE),
+    m_keepMassesConst(0),
+    m_logLevel(0),
+    m_recrecord(recrecord), m_fitrecord (new HHEventRecord(*recrecord, "Fit"))
 {
   m_particlelist = m_recrecord->GetParticleList();
 }
@@ -519,8 +519,8 @@ HHKinFit::ConstrainE2(Int_t iv4, Int_t iv41, Int_t iv42)
     M1 = m_fitrecord->GetEntry(iv41)->M();
     E2 = m_fitrecord->GetEntry(iv42)->E();
     M2 = m_fitrecord->GetEntry(iv42)->M();
-    
-    if (M2 == 0.) { // massless case
+
+    if ( M2 < (1.e-3*E2) ) { // massless case
       if(m_logLevel > 0)
 	std::cout << "Massless case!" << std::endl;
       m_fitrecord->UpdateEntry(iv42)->SetEkeepM(E2 * (Mc / M) * (Mc / M)); // only changes absolute value and keeps eta, phi, m untouched

@@ -1,4 +1,4 @@
-#include "HHKinFit/interface/PSTools.h"
+#include "HHKinFit/HHKinFit/interface/PSTools.h"
 
 // #include <RooEllipse.h>
 #include <Rtypes.h>
@@ -120,7 +120,7 @@ void
 PSTools::Pprint(const char* filename, TCanvas* c1)
 {
   TString text;
-  if (filename == "")
+  if (std::string(filename) == "")
     filename = "temp";
   text = filename;
   text = text + ".pdf";

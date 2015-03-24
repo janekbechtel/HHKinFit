@@ -7,8 +7,8 @@
 #ifndef EVENTRECORD_H_
 #define EVENTRECORD_H_
 
-#include "HHKinFit/interface/HHV4Vector.h"
-#include "HHKinFit/interface/HHParticleList.h"
+#include "HHKinFit/HHKinFit/interface/HHV4Vector.h"
+#include "HHKinFit/HHKinFit/interface/HHParticleList.h"
 #include <vector>
 #include <TString.h>
 

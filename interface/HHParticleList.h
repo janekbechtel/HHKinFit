@@ -10,9 +10,9 @@
 #include <Rtypes.h>
 #include <TString.h>
 
-#include "HHKinFit/interface/HHPID.h"
-#include "HHKinFit/interface/HHParticle.h"
-#include "HHKinFit/interface/HHV4Vector.h"
+#include "HHKinFit/HHKinFit/interface/HHPID.h"
+#include "HHKinFit/HHKinFit/interface/HHParticle.h"
+#include "HHKinFit/HHKinFit/interface/HHV4Vector.h"
 
 class HHParticleList
 {

@@ -4,8 +4,8 @@
  *  Created on: 17.06.2014
  */
 
-#include "HHKinFit/interface/HHEventRecord.h"
-#include "HHKinFit/interface/PSTools.h"
+#include "HHKinFit/HHKinFit/interface/HHEventRecord.h"
+#include "HHKinFit/HHKinFit/interface/PSTools.h"
 #include <iostream>
 
 HHEventRecord::HHEventRecord(HHParticleList* particlelist)

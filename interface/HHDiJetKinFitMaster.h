@@ -1,5 +1,5 @@
-#ifndef HHKinFit_HHDiJetKinFitMaster_H
-#define HHKinFit_HHDiJetKinFitMaster_H
+#ifndef HHKinFit_HHKinFit_HHDiJetKinFitMaster_H
+#define HHKinFit_HHKinFit_HHDiJetKinFitMaster_H
 
 #include <Rtypes.h>
 #include <stdio.h>
@@ -8,12 +8,12 @@
 #include <utility>
 #include <vector>
 
-#include "TLorentzVector.h"
+#include <TLorentzVector.h>
 
 class HHDiJetKinFitMaster
 {
 public:
-  HHDiJetKinFitMaster( TLorentzVector* bjet1, TLorentzVector* bjet2, Bool_t truthinput=true);
+  HHDiJetKinFitMaster( TLorentzVector* bjet1, TLorentzVector* bjet2 );
 
   void doFullFit();
   
@@ -36,16 +36,6 @@ public:
   //Resolution  
   Double_t GetBjetResolution(Double_t eta, Double_t et);
 
-  Double_t m_invMassAfterSmearing;
-  Double_t m_bjet1MassAfterSmearing;
-  Double_t m_bjet2MassAfterSmearing;
-  Double_t m_bJet1Diff;
-  Double_t m_bJet2Diff;
-  Double_t m_bJet1DiffPt;
-  Double_t m_bJet2DiffPt;
-  Double_t m_chi2Truth;
-  Double_t m_chi2b1;
-  Double_t m_chi2b2;
 private:
   //hypotheses
   std::vector< Int_t > m_mh;

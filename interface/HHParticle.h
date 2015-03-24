@@ -7,7 +7,7 @@
 
 #include <Rtypes.h>
 #include <TString.h>
-#include "HHKinFit/interface/HHPID.h"
+#include "HHKinFit/HHKinFit/interface/HHPID.h"
 
 class HHParticle {
 public:

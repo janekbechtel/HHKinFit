@@ -1,4 +1,4 @@
-#include "HHKinFit/interface/PSMath.h"
+#include "HHKinFit/HHKinFit/interface/PSMath.h"
 
 #include <TMarker.h>
 #include <TPolyMarker.h>

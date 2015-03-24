@@ -4,9 +4,9 @@
  *  Created on: Jun 17, 2014
  */
 
-#include "HHKinFit/interface/HHTauInputKinFit.h"
-#include "HHKinFit/interface/PSMath.h"
-#include "HHKinFit/interface/PSTools.h"
+#include "HHKinFit/HHKinFit/interface/HHTauInputKinFit.h"
+#include "HHKinFit/HHKinFit/interface/PSMath.h"
+#include "HHKinFit/HHKinFit/interface/PSTools.h"
 
 #include "TString.h"
 #include "TPad.h"

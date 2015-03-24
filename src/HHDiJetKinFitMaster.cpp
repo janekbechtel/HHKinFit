@@ -1,13 +1,11 @@
-#include "HHKinFit/interface/HHDiJetKinFitMaster.h"
+#include "HHKinFit/HHKinFit/interface/HHDiJetKinFitMaster.h"
 
-#include "HHKinFit/interface/HHEventRecord.h"
-#include "HHKinFit/interface/HHDiJetKinFit.h"
-#include "HHKinFit/interface/HHParticleList.h"
-#include "HHKinFit/interface/HHPID.h"
-#include "HHKinFit/interface/HHV4Vector.h"
-
+#include "HHKinFit/HHKinFit/interface/HHEventRecord.h"
+#include "HHKinFit/HHKinFit/interface/HHDiJetKinFit.h"
+#include "HHKinFit/HHKinFit/interface/HHParticleList.h"
+#include "HHKinFit/HHKinFit/interface/HHPID.h"
+#include "HHKinFit/HHKinFit/interface/HHV4Vector.h"
 #include "TMatrixD.h"
-#include "TRandom3.h"
 
 #include <TMath.h>
 #include <cmath>
@@ -22,25 +20,23 @@ HHDiJetKinFitMaster::doFullFit()
   HHEventRecord eventrecord_rec(particlelist);
 
   eventrecord_rec.UpdateEntry(HHEventRecord::b1)->SetVector(*m_bjet1);
-  eventrecord_rec.UpdateEntry(HHEventRecord::b1)->SetErrors(GetBjetResolution(m_bjet1->Eta(),m_bjet1->Et()), 0, 0);
+  eventrecord_rec.UpdateEntry(HHEventRecord::b1)->SetErrors(GetBjetResolution(m_bjet1->Eta(), m_bjet1->Et()), 0, 0);
   eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetVector(*m_bjet2);
-  eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetErrors(GetBjetResolution(m_bjet2->Eta(),m_bjet2->Et()), 0, 0);
+  eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetErrors(GetBjetResolution(m_bjet2->Eta(), m_bjet2->Et()), 0, 0);
 
   //loop over all hypotheses
-  for(std::vector<Int_t>::iterator mh = m_mh.begin(); mh != m_mh.end(); mh++){
+  for ( std::vector<Int_t>::iterator mh = m_mh.begin(); mh != m_mh.end(); mh++ ){
+    //std::cout << "mh = " << (*mh) << std::endl;
     particlelist->UpdateMass(HHPID::h2, *mh);
 
-
     HHDiJetKinFit advancedfitter(&eventrecord_rec);
-    //HHDiJetKinFitNewMini advancedfitter(&eventrecord_rec); //Choose Minimiser
-
-    advancedfitter.SetPrintLevel(2);
-    advancedfitter.SetLogLevel(2);
-
+    advancedfitter.SetPrintLevel(0);
+    advancedfitter.SetLogLevel(0);
     advancedfitter.Fit();
     
     Double_t chi2_full = advancedfitter.GetChi2();
     Double_t prob_full = TMath::Prob(chi2_full,3);
+    //std::cout << "--> chi^2 = " << chi2_full << ", prob = " << prob_full << std::endl;
     std::pair< Int_t, Int_t > hypo_full(*mh,-1);
     std::pair< std::pair< Int_t, Int_t >, Double_t > entry_chi2_full (hypo_full, chi2_full);
     std::pair< std::pair< Int_t, Int_t >, Double_t > entry_fitprob_full (hypo_full, prob_full);
@@ -52,68 +48,26 @@ HHDiJetKinFitMaster::doFullFit()
     m_fullFitPullB1.insert(entry_pullb1_full);
     m_fullFitPullB2.insert(entry_pullb2_full);
     m_fullFitConvergence.insert(entry_convergence_full);
-    if (chi2_full<m_bestChi2FullFit) {
+    if ( chi2_full < m_bestChi2FullFit || m_bestChi2FullFit < 0. ) {
       m_bestChi2FullFit = chi2_full;
       m_bestHypoFullFit = hypo_full;
     }
 
     m_bjet1_fitted = advancedfitter.GetFitJet1();
     m_bjet2_fitted = advancedfitter.GetFitJet2();
-    m_chi2b1 = pow( (advancedfitter.GetFitJet1().E() - m_bjet1->E())/GetBjetResolution(m_bjet1->Eta(),m_bjet1->Et()),2);
-    m_chi2b2 = pow( (advancedfitter.GetFitJet2().E() - m_bjet2->E())/GetBjetResolution(m_bjet2->Eta(),m_bjet2->Et()),2);
   }
 
   delete particlelist;
 }
 
-HHDiJetKinFitMaster::HHDiJetKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, Bool_t truthinput):
+HHDiJetKinFitMaster::HHDiJetKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2):
     m_mh(std::vector<Int_t>()),
     m_bjet1(bjet1),
     m_bjet2(bjet2),
     m_fullFitResultChi2(std::map< std::pair<Int_t,Int_t> , Double_t>()),
-    m_bestChi2FullFit(999),
+    m_bestChi2FullFit(-1.),
     m_bestHypoFullFit(std::pair<Int_t, Int_t>(-1,-1))
 {
-  m_invMassAfterSmearing = -1.0;
-  m_chi2Truth = -1.0;
-  m_bJet1Diff = -1.0;
-  m_bJet2Diff = -1.0;
-  m_chi2b1 = -999.0;
-  m_chi2b2 = -999.0;
-  if (truthinput){
-    TRandom3 r(0);
-    
-    Double_t bjet1_res = GetBjetResolution(bjet1->Eta(), bjet1->Et());
-    Double_t bjet1_ETruth = bjet1->E();
-    Double_t bjet1_E  = r.Gaus(bjet1->E(),bjet1_res);
-    Double_t bjet1_P  = sqrt(pow(bjet1_E,2) - pow(bjet1->M(),2));
-    Double_t bjet1_Pt = sin(bjet1->Theta())*bjet1_P;
-
-    m_bJet1Diff = bjet1->E() - bjet1_E;
-    m_bJet1DiffPt = bjet1->Pt() - bjet1_Pt;
-
-    bjet1->SetPtEtaPhiE(bjet1_Pt, bjet1->Eta(), bjet1->Phi(), bjet1_E);
-
-    m_bjet1MassAfterSmearing = bjet1->M();
-
-    Double_t bjet2_res = GetBjetResolution(bjet2->Eta(), bjet2->Et());
-    Double_t bjet2_ETruth = bjet2->E();
-    Double_t bjet2_E  = r.Gaus(bjet2->E(),bjet2_res);
-    Double_t bjet2_P  = sqrt(pow(bjet2_E,2) - pow(bjet2->M(),2));
-    Double_t bjet2_Pt = sin(bjet2->Theta())*bjet2_P;
-
-    m_bJet2Diff = bjet2->E() - bjet2_E;
-    m_bJet2DiffPt = bjet2->Pt() - bjet2_Pt;
-
-    bjet2->SetPtEtaPhiE(bjet2_Pt, bjet2->Eta(), bjet2->Phi(), bjet2_E); 
-
-    m_bjet2MassAfterSmearing = bjet2->M();
-    double chi2Truthb1 = pow((bjet1_E - bjet1_ETruth)/GetBjetResolution(bjet1->Eta(), bjet1->Et() ),2);
-    double chi2Truthb2 = pow((bjet2_E - bjet2_ETruth)/GetBjetResolution(bjet2->Eta(), bjet2->Et() ),2);
-    m_chi2Truth = chi2Truthb1 + chi2Truthb2;
-
-    m_invMassAfterSmearing = (*bjet1 + *bjet2).M();
-  }
 }
 
 Double_t
@@ -178,7 +132,6 @@ double
 HHDiJetKinFitMaster::GetBjetResolution(double eta, double et){
   double det=0;
   double de=10;
-  
 
   if(0.000<=abs(eta) && abs(eta)<0.087){
   det = et * (sqrt(0.0686*0.0686 + (1.03/sqrt(et))*(1.03/sqrt(et)) + (1.68/et)*(1.68/et)));

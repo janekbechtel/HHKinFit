@@ -7,8 +7,8 @@
 #ifndef HHKINFIT_H_
 #define HHKINFIT_H_
 
-#include "HHKinFit/interface/HHV4Vector.h"
-#include "HHKinFit/interface/HHEventRecord.h"
+#include "HHKinFit/HHKinFit/interface/HHV4Vector.h"
+#include "HHKinFit/HHKinFit/interface/HHEventRecord.h"
 #include <Rtypes.h>
 #include <TH1F.h>
 

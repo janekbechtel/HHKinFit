@@ -4,9 +4,9 @@
  *  Created on: Jun 17, 2014
  */
 
-#include "HHKinFit/interface/HHKinFitSingleH.h"
-#include "HHKinFit/interface/PSMath.h"
-#include "HHKinFit/interface/PSTools.h"
+#include "HHKinFit/HHKinFit/interface/HHKinFitSingleH.h"
+#include "HHKinFit/HHKinFit/interface/PSMath.h"
+#include "HHKinFit/HHKinFit/interface/PSTools.h"
 
 #include "TString.h"
 #include "TPad.h"
@@ -237,7 +237,7 @@ HHKinFitSingleH::Fit()
   // ------ end of FIT loop
   
   if(m_convergence != 0 && m_convergence != 5){
-    if(a[1] < (alimit[0][0] + 2*aprec[0]) ){
+    if(a[0] < (alimit[0][0] + 2*aprec[0]) ){
       if(m_convergence == 3)
         m_convergence = 5;
       else{
@@ -245,7 +245,7 @@ HHKinFitSingleH::Fit()
         m_convergence = 4;
       }
     }
-    if(a[1] > (alimit[0][1] - 2*aprec[0]) ){
+    if(a[0] > (alimit[0][1] - 2*aprec[0]) ){
       if(m_convergence == 3)
 	m_convergence = 5;
       else{

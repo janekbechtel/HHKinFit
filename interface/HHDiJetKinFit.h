@@ -1,23 +1,22 @@
 /*
- * HHDiJetKinFit.h
+ * DiJetKinFit.h
  *
+ *  Created on: Jun 17, 2014
+ *      Author: vormwald
  */
 
-#ifndef HHKinFit_HHDIJETKINFIT_H_
-#define HHKinFit_HHDIJETKINFIT_H_
+#ifndef HHKinFit_HHKinFit_DIJETKINFIT_H_
+#define HHKinFit_HHKinFit_DIJETKINFIT_H_
 
-#include "HHKinFit/interface/HHV4Vector.h"
-#include "HHKinFit/interface/HHEventRecord.h"
+#include "HHKinFit/HHKinFit/interface/HHV4Vector.h"
+#include "HHKinFit/HHKinFit/interface/HHEventRecord.h"
 #include <Rtypes.h>
 #include <TH1F.h>
 
 class HHDiJetKinFit{
 public:
   HHDiJetKinFit(HHEventRecord* recrecord);
-  ~HHDiJetKinFit();
 
-  
-  
   void FitNew();
   void Fit();
   void ConstrainE2(Int_t iv4, Int_t iv41, Int_t iv42);
@@ -69,7 +68,5 @@ private:
   Int_t m_graphicslevel;
   Int_t m_maxloops;
 };
-
-
 
 #endif /* HHDIJETKINFIT_H_ */

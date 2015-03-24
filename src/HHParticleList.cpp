@@ -4,8 +4,8 @@
  *  Created on: 17.06.2014
  */
 
-#include "HHKinFit/interface/HHParticleList.h"
-#include "HHKinFit/interface/HHEventRecord.h"
+#include "HHKinFit/HHKinFit/interface/HHParticleList.h"
+#include "HHKinFit/HHKinFit/interface/HHEventRecord.h"
 #include <iostream>
 
 HHParticleList::HHParticleList()
