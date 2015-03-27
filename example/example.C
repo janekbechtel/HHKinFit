@@ -1,5 +1,5 @@
 #include <iostream>
-#include "HHKinFitMaster.h"
+#include "../interface/HHKinFitMaster.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1F.h"

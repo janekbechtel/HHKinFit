@@ -8,7 +8,7 @@
 #include "../interface/HHKinFit.h"
 #include "../interface/PSMath.h"
 #include "../interface/PSTools.h"
-#els
+#else
 #include "HHKinFit/HHKinFit/interface/HHKinFit.h"
 #include "HHKinFit/HHKinFit/interface/PSMath.h"
 #include "HHKinFit/HHKinFit/interface/PSTools.h"

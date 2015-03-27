@@ -1,5 +1,4 @@
-
-#ifdef HHKINFIT_Standalone
+#ifdef HHKINFIT_STANDALONE
 #include "../interface/HHDiJetKinFitMaster.h"
 #include "../interface/HHEventRecord.h"
 #include "../interface/HHDiJetKinFit.h"
@@ -14,6 +13,7 @@
 #include "HHKinFit/HHKinFit/interface/HHPID.h"
 #include "HHKinFit/HHKinFit/interface/HHV4Vector.h"
 #endif
+
 #include "TMatrixD.h"
 
 #include <TMath.h>
