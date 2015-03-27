@@ -3,9 +3,14 @@
  *
  *  Created on: 17.06.2014
  */
-
+#ifdef HHKINFIT_STANDALONE
+#include "../interface/HHEventRecordSingleH.h"
+#include "../interface/PSTools.h"
+#else
 #include "HHKinFit/HHKinFit/interface/HHEventRecordSingleH.h"
 #include "HHKinFit/HHKinFit/interface/PSTools.h"
+#endif
+
 #include <iostream>
 
 HHEventRecordSingleH::HHEventRecordSingleH(HHParticleList* particlelist)

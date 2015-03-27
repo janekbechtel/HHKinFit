@@ -5,9 +5,15 @@
  *      Author: vormwald
  */
 
+#ifdef HHKINFIT_STANDALONE
+#include "../interface/HHDiJetKinFit.h"
+#include "../interface/PSMath.h"
+#include "../interface/PSTools.h"
+#else
 #include "HHKinFit/HHKinFit/interface/HHDiJetKinFit.h"
 #include "HHKinFit/HHKinFit/interface/PSMath.h"
 #include "HHKinFit/HHKinFit/interface/PSTools.h"
+#endif
 
 #include "TString.h"
 #include "TPad.h"

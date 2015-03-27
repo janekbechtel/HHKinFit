@@ -1,5 +1,10 @@
+#ifdef HHKINFIT_STANDALONE
+#include "../interface/HHParticle.h"
+#include "../interface/PSTools.h"
+#else
 #include "HHKinFit/HHKinFit/interface/HHParticle.h"
 #include "HHKinFit/HHKinFit/interface/PSTools.h"
+#endif
 
 #include <iostream>
 

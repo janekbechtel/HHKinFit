@@ -7,8 +7,12 @@
 
 #include <Rtypes.h>
 #include <TString.h>
-#include "HHKinFit/HHKinFit/interface/HHPID.h"
 
+#ifdef HHKINFIT_STANDALONE
+#include "../interface/HHPID.h"
+#else
+#include "HHKinFit/HHKinFit/interface/HHPID.h"
+#endif
 class HHParticle {
 public:
   HHParticle();

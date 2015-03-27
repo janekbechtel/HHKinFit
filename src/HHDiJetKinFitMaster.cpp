@@ -1,10 +1,19 @@
-#include "HHKinFit/HHKinFit/interface/HHDiJetKinFitMaster.h"
 
+#ifdef HHKINFIT_Standalone
+#include "../interface/HHDiJetKinFitMaster.h"
+#include "../interface/HHEventRecord.h"
+#include "../interface/HHDiJetKinFit.h"
+#include "../interface/HHParticleList.h"
+#include "../interface/HHPID.h"
+#include "../interface/HHV4Vector.h"
+#else
+#include "HHKinFit/HHKinFit/interface/HHDiJetKinFitMaster.h"
 #include "HHKinFit/HHKinFit/interface/HHEventRecord.h"
 #include "HHKinFit/HHKinFit/interface/HHDiJetKinFit.h"
 #include "HHKinFit/HHKinFit/interface/HHParticleList.h"
 #include "HHKinFit/HHKinFit/interface/HHPID.h"
 #include "HHKinFit/HHKinFit/interface/HHV4Vector.h"
+#endif
 #include "TMatrixD.h"
 
 #include <TMath.h>

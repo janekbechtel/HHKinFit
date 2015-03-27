@@ -3,9 +3,13 @@
  *
  *  Created on: 17.06.2014
  */
-
+#ifdef HHKINFIT_STANDALONE
+#include "../interface/HHEventRecord.h"
+#include "../interface/PSTools.h"
+#else
 #include "HHKinFit/HHKinFit/interface/HHEventRecord.h"
 #include "HHKinFit/HHKinFit/interface/PSTools.h"
+#endif
 #include <iostream>
 
 HHEventRecord::HHEventRecord(HHParticleList* particlelist)

@@ -10,9 +10,15 @@
 #include <Rtypes.h>
 #include <TString.h>
 
+#ifdef HHKINFIT_STANDALONE
+#include "../interface/HHPID.h"
+#include "../interface/HHParticle.h"
+#include "../interface/HHV4Vector.h"
+#else
 #include "HHKinFit/HHKinFit/interface/HHPID.h"
 #include "HHKinFit/HHKinFit/interface/HHParticle.h"
 #include "HHKinFit/HHKinFit/interface/HHV4Vector.h"
+#endif
 
 class HHParticleList
 {

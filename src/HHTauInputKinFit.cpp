@@ -4,9 +4,15 @@
  *  Created on: Jun 17, 2014
  */
 
+#ifdef HHKINFIT_STANDALONE
+#include "../interface/HHTauInputKinFit.h"
+#include "../interface/PSMath.h"
+#include "../interface/PSTools.h"
+#else
 #include "HHKinFit/HHKinFit/interface/HHTauInputKinFit.h"
 #include "HHKinFit/HHKinFit/interface/PSMath.h"
 #include "HHKinFit/HHKinFit/interface/PSTools.h"
+#endif
 
 #include "TString.h"
 #include "TPad.h"

@@ -1,4 +1,8 @@
+#ifdef HHKINFIT_STANDALONE
+#include "../interface/PSMath.h"
+#else
 #include "HHKinFit/HHKinFit/interface/PSMath.h"
+#endif
 
 #include <TMarker.h>
 #include <TPolyMarker.h>

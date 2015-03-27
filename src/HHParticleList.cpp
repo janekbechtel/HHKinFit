@@ -3,9 +3,13 @@
  *
  *  Created on: 17.06.2014
  */
-
+#ifdef HHKINFIT_STANDALONE
+#include "../interface/HHParticleList.h"
+#include "../interface/HHEventRecord.h"
+#else
 #include "HHKinFit/HHKinFit/interface/HHParticleList.h"
 #include "HHKinFit/HHKinFit/interface/HHEventRecord.h"
+#endif
 #include <iostream>
 
 HHParticleList::HHParticleList()

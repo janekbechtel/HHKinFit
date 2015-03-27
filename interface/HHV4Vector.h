@@ -8,7 +8,13 @@
 #include <Rtypes.h>
 #include <TString.h>
 #include <cmath>
+
+#ifdef HHKINFIT_STANDALONE
+#include "../interface/HHPID.h"
+#else
 #include "HHKinFit/HHKinFit/interface/HHPID.h"
+#endif
+
 #include "TLorentzVector.h"
 #include "TMatrixD.h"
 #include "Math/Vector3D.h"

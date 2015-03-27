@@ -1,4 +1,9 @@
+#ifdef HHKINFIT_STANDALONE
+#include "../interface/PSTools.h"
+#else
 #include "HHKinFit/HHKinFit/interface/PSTools.h"
+#endif
+
 
 // #include <RooEllipse.h>
 #include <Rtypes.h>
