@@ -31,6 +31,7 @@ public:
   Int_t getBestHypoFullFit();
   std::map< Int_t, Double_t > getChi2FullFit();
   std::map< Int_t, Double_t > getFitProbFullFit();
+  Double_t getFitProb(Int_t mh);
   std::map< Int_t, Double_t > getPullBalanceFullFit();
   std::map< Int_t, Double_t > getPullBalanceFullFitX();
   std::map< Int_t, Double_t > getPullBalanceFullFitY();
@@ -50,7 +51,7 @@ public:
   TLorentzVector m_tau1_fitted;
   TLorentzVector m_tau2_fitted;
   TLorentzVector m_met_smeared; 
-  bool m_fixedCovMatrix;
+  bool m_fixedCovMatrix; //returns value for last fit
 private:
   //hypotheses
   std::vector< Int_t > m_mh;

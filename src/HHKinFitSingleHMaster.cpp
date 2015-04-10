@@ -44,7 +44,6 @@ HHKinFitSingleHMaster::doFullFit()
   }
 
   //loop over all hypotheses
-  //TLorentzVector *tau1_fitted_best, *tau2_fitted_best;
   for(std::vector<Int_t>::iterator mh = m_mh.begin(); mh != m_mh.end(); mh++){
       particlelist->UpdateMass(HHPID::h1, *mh);
 
@@ -62,33 +61,29 @@ HHKinFitSingleHMaster::doFullFit()
       std::pair< Int_t, Double_t > entry_pullbalance_fullX (*mh, advancedfitter.GetPullBalanceX());
       std::pair< Int_t, Double_t > entry_pullbalance_fullY (*mh, advancedfitter.GetPullBalanceY());
       std::pair< Int_t, Int_t >    entry_convergence_full (*mh, advancedfitter.GetConvergence());
-      std::pair< Int_t, TLorentzVector > entry_tau1_fitted (*mh, advancedfitter.GetFitParticle(HHEventRecordSingleH::tau1));
-      std::pair< Int_t, TLorentzVector > entry_tau2_fitted (*mh, advancedfitter.GetFitParticle(HHEventRecordSingleH::tau2));
       m_fullFitResultChi2.insert(entry_chi2_full);
       m_fullFitResultFitProb.insert(entry_fitprob_full);
       m_fullFitPullBalance.insert(entry_pullbalance_full);
       m_fullFitPullBalanceX.insert(entry_pullbalance_fullX);
       m_fullFitPullBalanceY.insert(entry_pullbalance_fullY);
       m_fullFitConvergence.insert(entry_convergence_full);
-      m_tau1_fitted_map.insert(entry_tau1_fitted);
-      m_tau2_fitted_map.insert(entry_tau2_fitted);
+      m_tau1_fitted_map.insert(std::pair<Int_t,TLorentzVector>(*mh, advancedfitter.GetFitParticle(HHEventRecordSingleH::tau1)));
+      m_tau2_fitted_map.insert(std::pair<Int_t,TLorentzVector>(*mh, advancedfitter.GetFitParticle(HHEventRecordSingleH::tau2)));
       if (chi2_full<m_bestChi2FullFit) {
         m_bestChi2FullFit = chi2_full;
         m_bestHypoFullFit = *mh;
         m_tau1BestFit = &(m_tau1_fitted_map.at(*mh));
         m_tau2BestFit = &(m_tau2_fitted_map.at(*mh));
-        //m_tau1_fitted = m_tau1_fitted_map.at(*mh);
-        //m_tau2_fitted = m_tau2_fitted_map.at(*mh);
       }
       
-      //m_tau1_fitted = advancedfitter.GetFitParticle(HHEventRecordSingleH::tau1);
-      //m_tau2_fitted = advancedfitter.GetFitParticle(HHEventRecordSingleH::tau2);
       m_fixedCovMatrix = advancedfitter.m_fixedCovMatrix;
       
   }
 
-  m_tau1_fitted = *m_tau1BestFit;
-  m_tau2_fitted = *m_tau2BestFit;
+  if(m_tau1BestFit && m_tau2BestFit) {
+    m_tau1_fitted = *m_tau1BestFit;
+    m_tau2_fitted = *m_tau2BestFit;
+  }
   
   delete particlelist;
 }
@@ -111,7 +106,10 @@ HHKinFitSingleHMaster::HHKinFitSingleHMaster(const TLorentzVector* tauvis1, cons
     m_simpleBalanceUncert(10.0),
     m_fullFitResultChi2(std::map< Int_t , Double_t>()),
     m_bestChi2FullFit(999),
-    m_bestHypoFullFit(-1)
+    m_bestHypoFullFit(-1),
+
+    m_tau1BestFit(0),
+    m_tau2BestFit(0)
 {
   if (m_truthInput){
     TRandom3 r(0);   
@@ -162,6 +160,10 @@ HHKinFitSingleHMaster::getFitProbFullFit(){
   return m_fullFitResultFitProb;
 }
 
+Double_t HHKinFitSingleHMaster::getFitProb(Int_t mh) {
+  return m_fullFitResultFitProb.at(mh);
+}
+
 std::map< Int_t, Double_t >
 HHKinFitSingleHMaster::getPullBalanceFullFit(){
   return m_fullFitPullBalance;
@@ -190,14 +192,12 @@ HHKinFitSingleHMaster::getBestHypoFullFit()
 
 TLorentzVector HHKinFitSingleHMaster::getTau1Fitted(Int_t mh) {
   if(mh<0)
-    //throw std::out_of_range;
     getTau1BestFit();
   return m_tau1_fitted_map.at(mh);
 }
 
 TLorentzVector HHKinFitSingleHMaster::getTau2Fitted(Int_t mh) {
   if(mh<0)
-    //throw std::out_of_range;
     getTau2BestFit();
   return m_tau2_fitted_map.at(mh);
 }
