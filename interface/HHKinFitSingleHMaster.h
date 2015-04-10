@@ -18,12 +18,12 @@
 class HHKinFitSingleHMaster
 {
 public:
-  HHKinFitSingleHMaster( TLorentzVector* tauvis1, TLorentzVector* tauvis2, Bool_t truthinput=0, TLorentzVector* heavyhiggsgen=NULL);
+  HHKinFitSingleHMaster(const TLorentzVector* tauvis1, const TLorentzVector* tauvis2, Bool_t truthinput=0, TLorentzVector* heavyhiggsgen=NULL);
 
   void doFullFit();
   
   //Setters
-  void setAdvancedBalance(TLorentzVector* met, TMatrixD met_cov);
+  void setAdvancedBalance(const TLorentzVector* met, const TMatrixD& met_cov);
   void setSimpleBalance(Double_t balancePt, Double_t balanceUncert);
   
   //Getters for fit results
@@ -50,10 +50,10 @@ private:
   std::vector< Int_t > m_mh;
 
   //input vectors
-  TLorentzVector* m_tauvis1;
-  TLorentzVector* m_tauvis2;
+  const TLorentzVector* m_tauvis1;
+  const TLorentzVector* m_tauvis2;
 
-  TLorentzVector* m_MET;
+  const TLorentzVector* m_MET;
   TMatrixD m_MET_COV;
 
   //full event fit
@@ -67,6 +67,8 @@ private:
   std::map< Int_t, Double_t > m_fullFitPullBalanceX;
   std::map< Int_t, Double_t > m_fullFitPullBalanceY;
   std::map< Int_t, Int_t > m_fullFitConvergence;
+  std::map< Int_t, TLorentzVector > m_tau1_fitted_map;
+  std::map< Int_t, TLorentzVector > m_tau2_fitted_map;
 
   Double_t m_bestChi2FullFit;
   Double_t m_bestMHFullFit;
