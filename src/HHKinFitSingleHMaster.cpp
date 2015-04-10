@@ -44,7 +44,7 @@ HHKinFitSingleHMaster::doFullFit()
   }
 
   //loop over all hypotheses
-  TLorentzVector *tau1_fitted_best, *tau2_fitted_best;
+  //TLorentzVector *tau1_fitted_best, *tau2_fitted_best;
   for(std::vector<Int_t>::iterator mh = m_mh.begin(); mh != m_mh.end(); mh++){
       particlelist->UpdateMass(HHPID::h1, *mh);
 
@@ -75,10 +75,10 @@ HHKinFitSingleHMaster::doFullFit()
       if (chi2_full<m_bestChi2FullFit) {
         m_bestChi2FullFit = chi2_full;
         m_bestHypoFullFit = *mh;
-        //tau1_fitted_best = &(m_tau1_fitted_map.at(*mh));
-        //tau2_fitted_best = &(m_tau2_fitted_map.at(*mh));
-        m_tau1_fitted = m_tau1_fitted_map.at(*mh);
-        m_tau2_fitted = m_tau2_fitted_map.at(*mh);
+        m_tau1BestFit = &(m_tau1_fitted_map.at(*mh));
+        m_tau2BestFit = &(m_tau2_fitted_map.at(*mh));
+        //m_tau1_fitted = m_tau1_fitted_map.at(*mh);
+        //m_tau2_fitted = m_tau2_fitted_map.at(*mh);
       }
       
       //m_tau1_fitted = advancedfitter.GetFitParticle(HHEventRecordSingleH::tau1);
@@ -87,8 +87,8 @@ HHKinFitSingleHMaster::doFullFit()
       
   }
 
-  //m_tau1_fitted = TLorentzVector(*tau1_fitted_best);
-  //m_tau2_fitted = *tau2_fitted_best;
+  m_tau1_fitted = *m_tau1BestFit;
+  m_tau2_fitted = *m_tau2BestFit;
   
   delete particlelist;
 }
@@ -188,6 +188,35 @@ HHKinFitSingleHMaster::getBestHypoFullFit()
   return m_bestHypoFullFit;
 }
 
+TLorentzVector HHKinFitSingleHMaster::getTau1Fitted(Int_t mh) {
+  if(mh<0)
+    //throw std::out_of_range;
+    getTau1BestFit();
+  return m_tau1_fitted_map.at(mh);
+}
+
+TLorentzVector HHKinFitSingleHMaster::getTau2Fitted(Int_t mh) {
+  if(mh<0)
+    //throw std::out_of_range;
+    getTau2BestFit();
+  return m_tau2_fitted_map.at(mh);
+}
+
+TLorentzVector HHKinFitSingleHMaster::getTau1BestFit() {
+  return *m_tau1BestFit;
+} 
+
+TLorentzVector HHKinFitSingleHMaster::getTau2BestFit() {
+  return *m_tau2BestFit;
+}
+
+std::map<Int_t,TLorentzVector> HHKinFitSingleHMaster::getTau1FullFit() {
+  return m_tau1_fitted_map;
+}
+
+std::map<Int_t,TLorentzVector> HHKinFitSingleHMaster::getTau2FullFit() {
+  return m_tau2_fitted_map;
+}
 
 void
 HHKinFitSingleHMaster::addMhHypothesis(Double_t m1, Double_t m2, Double_t m3, Double_t m4, Double_t m5, Double_t m6, Double_t m7, Double_t m8, Double_t m9, Double_t m10)
