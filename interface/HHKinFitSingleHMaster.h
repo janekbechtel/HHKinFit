@@ -30,6 +30,7 @@ public:
   Double_t getBestChi2FullFit() const;
   Int_t getBestHypoFullFit() const;
   std::map< Int_t, Double_t > getChi2FullFit() const;
+  Double_t getChi2(Int_t mh) const;
   std::map< Int_t, Double_t > getFitProbFullFit() const;
   Double_t getFitProb(Int_t mh) const;
   std::map< Int_t, Double_t > getPullBalanceFullFit() const;
@@ -44,7 +45,7 @@ public:
   std::map<Int_t,TLorentzVector> getTau2FullFit() const;
 
   //Hypotheses
-  void addMhHypothesis(std::vector<Int_t> v);
+  void addMhHypothesis(const std::vector<Int_t>& v);
   void addMhHypothesis(Double_t m1, Double_t m2=0, Double_t m3=0, Double_t m4=0, Double_t m5=0, Double_t m6=0, Double_t m7=0, Double_t m8=0, Double_t m9=0, Double_t m10=0);
 
 
@@ -80,7 +81,6 @@ private:
   Double_t m_bestChi2FullFit;
   Double_t m_bestMHFullFit;
   Int_t m_bestHypoFullFit;
-  //TLorentzVector *m_tau1BestFit, *m_tau2BestFit;
 };
 
 #endif

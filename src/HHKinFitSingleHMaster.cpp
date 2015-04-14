@@ -153,6 +153,10 @@ HHKinFitSingleHMaster::getChi2FullFit() const {
   return m_fullFitResultChi2;
 }
 
+Double_t HHKinFitSingleHMaster::getChi2(Int_t mh) const {
+  return m_fullFitResultChi2.at(mh);
+}
+
 std::map< Int_t, Double_t >
 HHKinFitSingleHMaster::getFitProbFullFit() const {
   return m_fullFitResultFitProb;
@@ -190,13 +194,13 @@ HHKinFitSingleHMaster::getBestHypoFullFit() const
 
 TLorentzVector HHKinFitSingleHMaster::getTau1Fitted(Int_t mh) const {
   if(mh<0)
-    getTau1BestFit();
+    return getTau1BestFit();
   return m_tau1_fitted_map.at(mh);
 }
 
 TLorentzVector HHKinFitSingleHMaster::getTau2Fitted(Int_t mh) const {
   if(mh<0)
-    getTau2BestFit();
+    return getTau2BestFit();
   return m_tau2_fitted_map.at(mh);
 }
 
@@ -207,6 +211,8 @@ TLorentzVector HHKinFitSingleHMaster::getTau1BestFit() const {
 TLorentzVector HHKinFitSingleHMaster::getTau2BestFit() const {
   return m_tau2_fitted_map.at(m_bestHypoFullFit);
 }
+
+//TLorentzVector HHKinFitSingleHMaster::getFittedTau(int tau, 
 
 std::map<Int_t,TLorentzVector> HHKinFitSingleHMaster::getTau1FullFit() const {
   return m_tau1_fitted_map;
@@ -232,7 +238,7 @@ HHKinFitSingleHMaster::addMhHypothesis(Double_t m1, Double_t m2, Double_t m3, Do
 }
 
 void
-HHKinFitSingleHMaster::addMhHypothesis(std::vector<Int_t> v)
+HHKinFitSingleHMaster::addMhHypothesis(const std::vector<Int_t>& v)
 {
   m_mh = v;
 }
