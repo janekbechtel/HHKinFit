@@ -44,7 +44,7 @@ HHKinFitSingleHMaster::doFullFit()
   }
 
   //loop over all hypotheses
-  TLorentzVector *m_tau1BestFit, *m_tau2BestFit;
+  TLorentzVector *m_tau1BestFit=0, *m_tau2BestFit=0;
   for(std::vector<Int_t>::iterator mh = m_mh.begin(); mh != m_mh.end(); mh++){
       particlelist->UpdateMass(HHPID::h1, *mh);
 
@@ -211,8 +211,6 @@ TLorentzVector HHKinFitSingleHMaster::getTau1BestFit() const {
 TLorentzVector HHKinFitSingleHMaster::getTau2BestFit() const {
   return m_tau2_fitted_map.at(m_bestHypoFullFit);
 }
-
-//TLorentzVector HHKinFitSingleHMaster::getFittedTau(int tau, 
 
 std::map<Int_t,TLorentzVector> HHKinFitSingleHMaster::getTau1FullFit() const {
   return m_tau1_fitted_map;
