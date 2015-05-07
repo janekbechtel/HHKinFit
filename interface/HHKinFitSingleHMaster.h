@@ -43,6 +43,8 @@ public:
   TLorentzVector getTau2BestFit() const;
   std::map<Int_t,TLorentzVector> getTau1FullFit() const;
   std::map<Int_t,TLorentzVector> getTau2FullFit() const;
+  Double_t GetConvergence(Int_t mh=-1) const;
+  std::map<Int_t,Double_t> GetConvergenceFullFit() const;
 
   //Hypotheses
   void addMhHypothesis(const std::vector<Int_t>& v);
@@ -77,6 +79,7 @@ private:
   std::map< Int_t, Int_t > m_fullFitConvergence;
   std::map< Int_t, TLorentzVector > m_tau1_fitted_map;
   std::map< Int_t, TLorentzVector > m_tau2_fitted_map;
+  std::map<Int_t,Double_t> m_convergence;
 
   Double_t m_bestChi2FullFit;
   Double_t m_bestMHFullFit;
