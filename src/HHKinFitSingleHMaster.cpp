@@ -223,7 +223,10 @@ std::map<Int_t,TLorentzVector> HHKinFitSingleHMaster::getTau2FullFit() const {
 
 Double_t HHKinFitSingleHMaster::GetConvergence(Int_t mh) const {
   if(mh<0)
-    return m_convergence.at(m_bestHypoFullFit);
+    if(m_bestHypoFullFit>=0)
+      return m_convergence.at(m_bestHypoFullFit);
+    else
+      return -1;
   return m_convergence.at(mh);
 }
 
