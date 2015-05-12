@@ -71,7 +71,7 @@ HHKinFitSingleHMaster::doFullFit()
       m_tau1_fitted_map.insert(std::pair<Int_t,TLorentzVector>(*mh, advancedfitter.GetFitParticle(HHEventRecordSingleH::tau1)));
       m_tau2_fitted_map.insert(std::pair<Int_t,TLorentzVector>(*mh, advancedfitter.GetFitParticle(HHEventRecordSingleH::tau2)));
       m_convergence.insert(std::make_pair(*mh, advancedfitter.GetConvergence()));
-      if (chi2_full<m_bestChi2FullFit) {
+      if (chi2_full<m_bestChi2FullFit) { //if smalest chi2 >= 999 no best fit is set!
         m_bestChi2FullFit = chi2_full;
         m_bestHypoFullFit = *mh;
         m_tau1BestFit = &(m_tau1_fitted_map.at(*mh));
@@ -206,10 +206,16 @@ TLorentzVector HHKinFitSingleHMaster::getTau2Fitted(Int_t mh) const {
 }
 
 TLorentzVector HHKinFitSingleHMaster::getTau1BestFit() const {
+  if(m_bestHypoFullFit<0) {
+    return TLorentzVector(0,0,0,0);
+  }
   return m_tau1_fitted_map.at(m_bestHypoFullFit);
 } 
 
 TLorentzVector HHKinFitSingleHMaster::getTau2BestFit() const {
+  if(m_bestHypoFullFit<0) {
+    return TLorentzVector(0,0,0,0);
+  }
   return m_tau2_fitted_map.at(m_bestHypoFullFit);
 }
 
