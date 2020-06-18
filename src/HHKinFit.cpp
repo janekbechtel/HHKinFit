@@ -525,8 +525,7 @@ HHKinFit::ConstrainE2(Int_t iv4, Int_t iv41, Int_t iv42)
     M1 = m_fitrecord->GetEntry(iv41)->M();
     E2 = m_fitrecord->GetEntry(iv42)->E();
     M2 = m_fitrecord->GetEntry(iv42)->M();
-
-    if ( (M2 < (1.e-3*E2)) || (M2<0.)) { // massless case
+    if ( (M2 < (1.e-3*E2)) || (M2<0.) || loopCount>1000000) { // massless case
       if(m_logLevel > 0)
 	std::cout << "Massless case!" << std::endl;
       m_fitrecord->UpdateEntry(iv42)->SetEkeepM(E2 * (Mc / M) * (Mc / M)); // only changes absolute value and keeps eta, phi, m untouched
