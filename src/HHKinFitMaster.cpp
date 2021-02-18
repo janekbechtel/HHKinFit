@@ -23,7 +23,7 @@
 #include <iterator>
 
 void
-HHKinFitMaster::doFullFit()
+HHKinFitMaster::doFullFit(bool ifbReg, Float_t bRegVal1, Float_t bRegVal2)
 {
   //Setup event
   HHParticleList* particlelist = new HHParticleList();
@@ -36,13 +36,13 @@ HHKinFitMaster::doFullFit()
   if(m_truthInput)
     eventrecord_rec.UpdateEntry(HHEventRecord::b1)->SetErrors(m_bjet1Smear, 0, 0);
   else
-    eventrecord_rec.UpdateEntry(HHEventRecord::b1)->SetErrors(GetBjetResolution(m_bjet1->Eta(),m_bjet1->Et()), 0, 0);
+    eventrecord_rec.UpdateEntry(HHEventRecord::b1)->SetErrors(GetBjetResolution(m_bjet1->Eta(),m_bjet1->Et(), ifbReg, bRegVal1), 0, 0);
 
   eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetVector(*m_bjet2);
   if(m_truthInput)
     eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetErrors(m_bjet2Smear, 0, 0);
   else
-    eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetErrors(GetBjetResolution(m_bjet2->Eta(),m_bjet2->Et()), 0, 0);
+    eventrecord_rec.UpdateEntry(HHEventRecord::b2)->SetErrors(GetBjetResolution(m_bjet2->Eta(),m_bjet2->Et(), ifbReg, bRegVal2), 0, 0);
 
   if (!m_advancedBalance){
     eventrecord_rec.UpdateEntry(HHEventRecord::MET)->SetEEtaPhiM(m_simpleBalancePt,0,0,0);
@@ -58,7 +58,7 @@ HHKinFitMaster::doFullFit()
   for(std::vector<Int_t>::iterator mh1 = m_mh1.begin(); mh1 != m_mh1.end(); mh1++){
     for(std::vector<Int_t>::iterator mh2 = m_mh2.begin(); mh2 != m_mh2.end(); mh2++){
       particlelist->UpdateMass(HHPID::h1, *mh1);
-      particlelist->UpdateMass(HHPID::h2, *mh2);
+      particlelist->UpdateMass(HHPID::h2, *mh2); 
 
       HHKinFit advancedfitter(&eventrecord_rec);
       advancedfitter.SetPrintLevel(0);
@@ -72,7 +72,7 @@ HHKinFitMaster::doFullFit()
       Double_t chi2_balance = advancedfitter.GetChi2_balance();
       Double_t prob_full = TMath::Prob(chi2_full,2);
       Double_t mH_full   = advancedfitter.GetFittedMH();
-      std::pair< Int_t, Int_t > hypo_full(*mh1,*mh2);
+      std::pair< Int_t, Int_t > hypo_full(*mh1,*mh2); 
       std::pair< std::pair< Int_t, Int_t >, Double_t > entry_chi2_full (hypo_full, chi2_full);
       std::pair< std::pair< Int_t, Int_t >, Double_t > entry_chi2_bjet1 (hypo_full, chi2_bjet1);
       std::pair< std::pair< Int_t, Int_t >, Double_t > entry_chi2_bjet2 (hypo_full, chi2_bjet2);
@@ -180,7 +180,7 @@ HHKinFitMaster::doFullFit()
 
 
 
-HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLorentzVector* tauvis1, TLorentzVector* tauvis2, Bool_t truthinput, TLorentzVector* heavyhiggsgen):
+HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLorentzVector* tauvis1, TLorentzVector* tauvis2, bool ifbReg, Float_t bRegVal1, Float_t bRegVal2, Bool_t truthinput, TLorentzVector* heavyhiggsgen):
     m_mh1(std::vector<Int_t>()),
     m_mh2(std::vector<Int_t>()),
 
@@ -205,7 +205,7 @@ HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLo
   if (m_truthInput){
     TRandom3 r(0);   
     
-    m_bjet1Smear = GetBjetResolution(bjet1->Eta(), bjet1->Et());
+    m_bjet1Smear = GetBjetResolution(bjet1->Eta(), bjet1->Et(),  ifbReg, bRegVal1);
     Double_t bjet1_E  = r.Gaus(bjet1->E(), m_bjet1Smear);
     Double_t bjet1_P  = sqrt(pow(bjet1_E,2) - pow(bjet1->M(),2));
     Double_t bjet1_Pt = sin(bjet1->Theta())*bjet1_P;
@@ -219,7 +219,7 @@ HHKinFitMaster::HHKinFitMaster(TLorentzVector* bjet1, TLorentzVector* bjet2, TLo
     bjet1Cov(0,0) = pow(cos(bjet1->Phi())*bjet1_dpt,2);                           bjet1Cov(0,1) = sin(bjet1->Phi())*cos(bjet1->Phi())*bjet1_dpt*bjet1_dpt;
     bjet1Cov(1,0) = sin(bjet1->Phi())*cos(bjet1->Phi())*bjet1_dpt*bjet1_dpt;      bjet1Cov(1,1) = pow(sin(bjet1->Phi())*bjet1_dpt,2);
    
-    m_bjet2Smear = GetBjetResolution(bjet2->Eta(), bjet2->Et());
+    m_bjet2Smear = GetBjetResolution(bjet2->Eta(), bjet2->Et(), ifbReg, bRegVal2);
     Double_t bjet2_E  = r.Gaus(bjet2->E(), m_bjet2Smear);
     Double_t bjet2_P  = sqrt(pow(bjet2_E,2) - pow(bjet2->M(),2));
     Double_t bjet2_Pt = sin(bjet2->Theta())*bjet2_P;
@@ -389,7 +389,12 @@ HHKinFitMaster::setSimpleBalance(Double_t balancePt, Double_t balanceUncert)
 }
 
 double
-HHKinFitMaster::GetBjetResolution(double eta, double et){
+HHKinFitMaster::GetBjetResolution(double eta, double et, bool ifbReg, Float_t bRegVal){
+
+  if (ifbReg == true){
+    return bRegVal;
+  }
+  else{
   double det=0;
   double de=10;
 
@@ -524,5 +529,5 @@ HHKinFitMaster::GetBjetResolution(double eta, double et){
   }
 
   return de;
-
+  }
 }

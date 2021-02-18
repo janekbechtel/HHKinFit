@@ -18,9 +18,9 @@ typedef std::map<std::pair<double, double>, double> Chi2Map;
 class HHKinFitMaster
 {
 public:
-  HHKinFitMaster( TLorentzVector* bjet1, TLorentzVector* bjet2, TLorentzVector* tauvis1, TLorentzVector* tauvis2, Bool_t truthinput=0, TLorentzVector* heavyhiggsgen=NULL);
+  HHKinFitMaster( TLorentzVector* bjet1, TLorentzVector* bjet2, TLorentzVector* tauvis1, TLorentzVector* tauvis2, bool ifbReg, Float_t bRegVal1, Float_t bRegVal2, Bool_t truthinput=0, TLorentzVector* heavyhiggsgen=NULL);
 
-  void doFullFit();
+  void doFullFit(bool ifBReg, Float_t bRegVal1, Float_t bRegVal2);
   
   //Setters
   void setAdvancedBalance(TLorentzVector* met, TMatrixD met_cov);
@@ -50,7 +50,7 @@ public:
   void addMh2Hypothesis(Double_t m1, Double_t m2=0, Double_t m3=0, Double_t m4=0, Double_t m5=0, Double_t m6=0, Double_t m7=0, Double_t m8=0, Double_t m9=0, Double_t m10=0);
 
   //Resolution  
-  Double_t GetBjetResolution(Double_t eta, Double_t et);
+  Double_t GetBjetResolution(Double_t eta, Double_t et, bool ifbReg, Float_t bRegVal);
 
   TLorentzVector m_bjet1_fitted;
   TLorentzVector m_bjet2_fitted;
